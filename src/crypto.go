@@ -23,9 +23,6 @@ type ECPoint struct {
 	X, Y *big.Int
 }
 
-func ECZero() ECPoint{
-	return ECPoint{big.NewInt(0), big.NewInt(0)}
-}
 
 // Equal returns true if points p (self) and p2 (arg) are the same.
 func (p ECPoint) Equal(p2 ECPoint) bool {
@@ -61,6 +58,7 @@ type CryptoParams struct{
 	G []ECPoint				// slice of gen 1
 	H []ECPoint				// slice of gen 2
 	N *big.Int				// scalar prime
+	U ECPoint				// a point that is a fixed group element with an unknown discrete-log relative to g,h
 	V int				// Vector length
 }
 
@@ -78,7 +76,7 @@ func check(e error) {
 /*
 Vector Pedersen Commitment
 
-Given some array of values, we commit the array with different generators
+Given an array of values, we commit the array with different generators
 for each element and for each randomness.
  */
 func VectorPCommit(value []*big.Int) (ECPoint, []*big.Int) {
@@ -104,16 +102,66 @@ func VectorPCommit(value []*big.Int) (ECPoint, []*big.Int) {
 	return commitment, R
 }
 
+/*
+Two Vector P Commit
+
+Given an array of values, we commit the array with different generators
+for each element and for each randomness.
+ */
+func TwoVectorPCommit(a []*big.Int, b []*big.Int) (ECPoint) {
+	commitment := CP.Zero()
+
+	for i := 0; i < CP.V; i++{
+		modA := new(big.Int).Mod(a[i], CP.N)
+		modB := new(big.Int).Mod(b[i], CP.N)
+
+		// aG, bH
+		lhsX, lhsY := CP.C.ScalarMult(CP.G[i].X, CP.G[i].Y, modA.Bytes())
+		rhsX, rhsY := CP.C.ScalarMult(CP.H[i].X, CP.H[i].Y, modB.Bytes())
+
+		commitment = commitment.Add(ECPoint{lhsX, lhsY}).Add(ECPoint{rhsX, rhsY})
+	}
+
+	return commitment
+}
+
+
+/*
+Vector Pedersen Commitment with Gens
+
+Given an array of values, we commit the array with different generators
+for each element and for each randomness.
+
+We also pass in the Generators we want to use
+ */
+func TwoVectorPCommitWithGens(G,H []ECPoint, a, b []*big.Int) (ECPoint) {
+	commitment := CP.Zero()
+
+	for i := 0; i < len(G); i++{
+		modA := new(big.Int).Mod(a[i], CP.N)
+		modB := new(big.Int).Mod(b[i], CP.N)
+
+		// mG, rH
+		lhsX, lhsY := CP.C.ScalarMult(G[i].X, G[i].Y, modA.Bytes())
+		rhsX, rhsY := CP.C.ScalarMult(H[i].X, H[i].Y, modB.Bytes())
+
+		commitment = commitment.Add(ECPoint{lhsX, lhsY}).Add(ECPoint{rhsX, rhsY})
+	}
+
+	return commitment
+}
 
 
 
-type BulletProof struct {
+type InnerProdProof struct {
 	L 	ECPoint
 	R 	ECPoint
 	a	*big.Int
 	b 	*big.Int
 }
 
+
+// The length here always has to be a power of two
 func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 
 	c := big.NewInt(0)
@@ -133,10 +181,10 @@ Proves that <a,b>=c
 This is a building block for BulletProofs
 
 */
-func InnerProductProveSub(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) BulletProof {
+func InnerProductProveSub(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) InnerProdProof {
 	if len(a) == len(b) && len(a) ==1{
 		// Prover sends a & b
-		return BulletProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, a[0], b[0]}
+		return InnerProdProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, a[0], b[0]}
 	}
 
 	nprime := len(a)/2
@@ -144,18 +192,23 @@ func InnerProductProveSub(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P E
 	cl := InnerProduct(a[:nprime], b[nprime:])
 	cr := InnerProduct(a[nprime:], b[:nprime])
 
-
-
-	return BulletProof{ECZero(), ECZero(), cl, cr}
+	return InnerProdProof{CP.Zero(), CP.Zero(), cl, cr}
 }
 
-func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, u, P ECPoint) BulletProof{
+func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, P ECPoint) InnerProdProof{
 	// randomly generate an x value from public data
 	x := sha256.Sum256(a[0].Bytes()) // TODO: FIXME
 
-	Pprime := P.Add(u.Mult(new(big.Int).Mul(new(big.Int).SetBytes(x[:]), c)))
+	Pprime := P.Add(CP.U.Mult(new(big.Int).Mul(new(big.Int).SetBytes(x[:]), c)))
+	ux := CP.U.Mult(new(big.Int).SetBytes(x[:]))
+	return InnerProductProveSub(a, b, c, ux, Pprime)
+}
 
-	return InnerProductProveSub(a, b, c, u, Pprime)
+
+func InnerProductVerify(ipp InnerProdProof) bool{
+
+
+	return false
 }
 
 // NewECPrimeGroupKey returns the curve (field),
@@ -165,10 +218,11 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 	s256 := sha256.New()
 	gen1Vals := make([]ECPoint, n)
 	gen2Vals := make([]ECPoint, n)
+	u := ECPoint{big.NewInt(0), big.NewInt(0)}
 
 	i := 0;
 	confirmed := 0;
-	for confirmed < 2*n {
+	for confirmed < (2*n + 1) {
 		s256.Write(new(big.Int).Add(curValue, big.NewInt(int64(i))).Bytes())
 
 		potentialXValue := make([]byte, 33)
@@ -179,10 +233,14 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 
 		gen2, err := btcec.ParsePubKey(potentialXValue, btcec.S256())
 		if err == nil{
-			if confirmed % 2 == 0{
-				gen1Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
+			if confirmed == 2*n{ // once we've generated all g and h values then assign this to u
+				u = ECPoint{gen2.X, gen2.Y}
 			} else {
-				gen2Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
+				if confirmed%2 == 0 {
+					gen1Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
+				} else {
+					gen2Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
+				}
 			}
 			confirmed += 1;
 		}
@@ -195,6 +253,7 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 		gen1Vals,
 		gen2Vals,
 		btcec.S256().N,
+		u,
 		n}
 }
 

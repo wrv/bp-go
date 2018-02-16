@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="370c4cb5-3c12-4ff5-a881-a74423052a43" name="Default" comment="" />
+    <list default="true" id="370c4cb5-3c12-4ff5-a881-a74423052a43" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change beforePath="$PROJECT_DIR$/src/crypto.go" afterPath="$PROJECT_DIR$/src/crypto.go" />
+      <change beforePath="$PROJECT_DIR$/src/crypto_test.go" afterPath="$PROJECT_DIR$/src/crypto_test.go" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,8 +18,8 @@
       <file leaf-file-name="crypto.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/crypto.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="151" column="60" lean-forward="true" selection-start-line="151" selection-start-column="60" selection-end-line="151" selection-end-column="60" />
+            <state relative-caret-position="456">
+              <caret line="189" column="22" lean-forward="true" selection-start-line="189" selection-start-column="22" selection-end-line="189" selection-end-column="22" />
               <folding>
                 <element signature="e#13#147#0" expanded="true" />
               </folding>
@@ -27,7 +31,7 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="56">
-              <caret line="4" column="22" lean-forward="false" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+              <caret line="4" column="22" lean-forward="true" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -36,8 +40,8 @@
       <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="728">
-              <caret line="52" column="0" lean-forward="true" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+            <state relative-caret-position="431">
+              <caret line="67" column="31" lean-forward="true" selection-start-line="67" selection-start-column="31" selection-end-line="67" selection-end-column="31" />
               <folding>
                 <element signature="e#12#45#0" expanded="true" />
               </folding>
@@ -54,6 +58,11 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>CP.</find>
+    </findStrings>
+  </component>
   <component name="GOROOT" path="/usr/lib/go-1.6" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -63,8 +72,8 @@
       <list>
         <option value="$PROJECT_DIR$/src/Crypto.go" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/crypto_test.go" />
         <option value="$PROJECT_DIR$/src/crypto.go" />
+        <option value="$PROJECT_DIR$/src/crypto_test.go" />
       </list>
     </option>
   </component>
@@ -134,7 +143,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.TestInnerProduct in crypto_test.go">
+  <component name="RunManager" selected="Go Test.TestInnerProductProve in crypto_test.go">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -151,6 +160,15 @@
       <kind value="PACKAGE" />
       <package value="github.com/wrv/bp-go/src" />
       <pattern value="^TestInnerProduct$" />
+    </configuration>
+    <configuration name="TestInnerProductProve in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+      <module name="bp-go" />
+      <working_directory value="$PROJECT_DIR$/src" />
+      <go_parameters value="-i" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/wrv/bp-go/src" />
+      <pattern value="^TestInnerProductProve$" />
     </configuration>
     <configuration name="TestVectorPCommit3 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="bp-go" />
@@ -177,16 +195,18 @@
       <framework value="gotest" />
       <kind value="DIRECTORY" />
     </configuration>
-    <list size="3">
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Go Test.TestVerifyParamGeneration in crypto_test.go" />
       <item index="1" class="java.lang.String" itemvalue="Go Test.TestVectorPCommit3 in crypto_test.go" />
       <item index="2" class="java.lang.String" itemvalue="Go Test.TestInnerProduct in crypto_test.go" />
+      <item index="3" class="java.lang.String" itemvalue="Go Test.TestInnerProductProve in crypto_test.go" />
     </list>
     <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProduct in crypto_test.go" />
-        <item index="1" class="java.lang.String" itemvalue="Go Test.TestVectorPCommit3 in crypto_test.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Test.TestVerifyParamGeneration in crypto_test.go" />
+      <list size="4">
+        <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProductProve in crypto_test.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Test.TestInnerProduct in crypto_test.go" />
+        <item index="2" class="java.lang.String" itemvalue="Go Test.TestVectorPCommit3 in crypto_test.go" />
+        <item index="3" class="java.lang.String" itemvalue="Go Test.TestVerifyParamGeneration in crypto_test.go" />
       </list>
     </recent_temporary>
   </component>
@@ -194,6 +214,12 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TestHistory">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.16 at 15h 29m 41s.xml">
+      <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.16 at 15h 31m 35s.xml">
+      <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
     <history-entry file="TestInnerProduct_in_crypto_test_go - 2018.02.16 at 01h 16m 15s.xml">
       <configuration name="TestInnerProduct in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
@@ -342,29 +368,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="56">
-          <caret line="4" column="22" lean-forward="false" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/lib/go-1.6/src/math/big/int.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="361">
           <caret line="307" column="14" lean-forward="false" selection-start-line="307" selection-start-column="14" selection-end-line="307" selection-end-column="14" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="728">
-          <caret line="52" column="0" lean-forward="true" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
-          <folding>
-            <element signature="e#12#45#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -384,10 +392,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../btcsuite/btcd/btcec/btcec.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="910" column="15" lean-forward="false" selection-start-line="910" selection-start-column="14" selection-end-line="910" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="56">
+          <caret line="4" column="22" lean-forward="true" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="431">
+          <caret line="67" column="31" lean-forward="true" selection-start-line="67" selection-start-column="31" selection-end-line="67" selection-end-column="31" />
+          <folding>
+            <element signature="e#12#45#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="151" column="60" lean-forward="true" selection-start-line="151" selection-start-column="60" selection-end-line="151" selection-end-column="60" />
+        <state relative-caret-position="456">
+          <caret line="189" column="22" lean-forward="true" selection-start-line="189" selection-start-column="22" selection-end-line="189" selection-end-column="22" />
           <folding>
             <element signature="e#13#147#0" expanded="true" />
           </folding>

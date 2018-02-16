@@ -50,29 +50,50 @@ func TestVectorPCommit3(t *testing.T) {
 }
 
 func TestInnerProductProve(t *testing.T) {
-
-}
-
-
-func TestInnerProduct(t *testing.T) {
-	a := make([]*big.Int, 5)
-	b := make([]*big.Int, 5)
+	a := make([]*big.Int, 4)
+	b := make([]*big.Int, 4)
 
 	a[0] = big.NewInt(2)
 	a[1] = big.NewInt(2)
 	a[2] = big.NewInt(2)
 	a[3] = big.NewInt(2)
-	a[4] = big.NewInt(2)
 
 	b[0] = big.NewInt(2)
 	b[1] = big.NewInt(2)
 	b[2] = big.NewInt(2)
 	b[3] = big.NewInt(2)
-	b[4] = big.NewInt(2)
+
+	c := big.NewInt(16)
+
+	P := TwoVectorPCommit(a, b)
+
+	ipp := InnerProductProve(a, b, c, P)
+
+	if InnerProductVerify(ipp){
+		println("Inner Product Proof correct")
+	} else {
+		println("Inner Product Proof incorrect")
+	}
+}
+
+
+func TestInnerProduct(t *testing.T) {
+	a := make([]*big.Int, 4)
+	b := make([]*big.Int, 4)
+
+	a[0] = big.NewInt(2)
+	a[1] = big.NewInt(2)
+	a[2] = big.NewInt(2)
+	a[3] = big.NewInt(2)
+
+	b[0] = big.NewInt(2)
+	b[1] = big.NewInt(2)
+	b[2] = big.NewInt(2)
+	b[3] = big.NewInt(2)
 
 	c := InnerProduct(a, b)
 
-	if c.Cmp(big.NewInt(20)) == 0 {
+	if c.Cmp(big.NewInt(16)) == 0 {
 		println("Success - Innerproduct works with 2")
 	} else{
 		println("Failure - Innerproduct equal to ")
