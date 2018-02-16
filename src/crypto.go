@@ -10,6 +10,7 @@ import (
 	"math/big"
 
 	"github.com/btcsuite/btcd/btcec"
+	"container/list"
 )
 
 var CP CryptoParams
@@ -104,8 +105,19 @@ func VectorPCommit(value []*big.Int) (ECPoint, []*big.Int) {
 
 
 type BulletProof struct {
-	X, Y *big.Int
+	L 	ECPoint
+	R 	ECPoint
+	a	*big.Int
+	b 	*big.Int
 }
+
+func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
+
+	c := big.NewInt(1)
+
+	return new(big.Int).Mod(c, CP.C.Params().P)
+}
+
 
 /* Inner Product Argument
 
@@ -114,7 +126,17 @@ Proves that <a,b>=c
 This is a building block for BulletProofs
 
 */
-func InnerProductProve( a ECPoint, b ECPoint, c *big.Int) BulletProof {
+func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) BulletProof {
+	if len(a) == len(b) && len(a) ==1{
+		// Prover sends a & b
+		return BulletProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, a[0], b[0]}
+	}
+
+	nprime := len(a)/2
+
+	cl := InnerProduct(a[:nprime], b[nprime:])
+	cr := InnerProduct(a[nprime:], b[:nprime])
+
 
 
 	return BulletProof{}
