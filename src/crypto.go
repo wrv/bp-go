@@ -133,7 +133,7 @@ Proves that <a,b>=c
 This is a building block for BulletProofs
 
 */
-func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) BulletProof {
+func InnerProductProveSub(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) BulletProof {
 	if len(a) == len(b) && len(a) ==1{
 		// Prover sends a & b
 		return BulletProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, a[0], b[0]}
@@ -149,7 +149,14 @@ func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPo
 	return BulletProof{ECZero(), ECZero(), cl, cr}
 }
 
+func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, u, P ECPoint) BulletProof{
+	// randomly generate an x value from public data
+	x := sha256.Sum256(a[0].Bytes()) // TODO: FIXME
 
+	Pprime := P.Add(u.Mult(new(big.Int).Mul(new(big.Int).SetBytes(x[:]), c)))
+
+	return InnerProductProveSub(a, b, c, u, Pprime)
+}
 
 // NewECPrimeGroupKey returns the curve (field),
 // Generator 1 x&y, Generator 2 x&y, order of the generators

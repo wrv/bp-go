@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="370c4cb5-3c12-4ff5-a881-a74423052a43" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/src/crypto.go" afterPath="$PROJECT_DIR$/src/crypto.go" />
-      <change beforePath="$PROJECT_DIR$/src/crypto_test.go" afterPath="$PROJECT_DIR$/src/crypto_test.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,8 +16,8 @@
       <file leaf-file-name="crypto.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/crypto.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="141" column="22" lean-forward="true" selection-start-line="141" selection-start-column="22" selection-end-line="141" selection-end-column="22" />
+            <state relative-caret-position="95">
+              <caret line="142" column="0" lean-forward="true" selection-start-line="142" selection-start-column="0" selection-end-line="142" selection-end-column="0" />
               <folding>
                 <element signature="e#13#147#0" expanded="true" />
               </folding>
@@ -40,8 +38,8 @@
       <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="53" column="1" lean-forward="true" selection-start-line="53" selection-start-column="1" selection-end-line="53" selection-end-column="1" />
+            <state relative-caret-position="728">
+              <caret line="52" column="0" lean-forward="true" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
               <folding>
                 <element signature="e#12#45#0" expanded="true" />
               </folding>
@@ -67,8 +65,8 @@
       <list>
         <option value="$PROJECT_DIR$/src/Crypto.go" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/crypto.go" />
         <option value="$PROJECT_DIR$/src/crypto_test.go" />
+        <option value="$PROJECT_DIR$/src/crypto.go" />
       </list>
     </option>
   </component>
@@ -202,6 +200,9 @@
       <configuration name="TestInnerProduct in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
     <history-entry file="TestInnerProduct_in_crypto_test_go - 2018.02.16 at 01h 16m 51s.xml">
+      <configuration name="TestInnerProduct in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProduct_in_crypto_test_go - 2018.02.16 at 01h 23m 34s.xml">
       <configuration name="TestInnerProduct in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
     <history-entry file="TestVectorPCommit3_in_crypto_test_go - 2018.02.15 at 19h 40m 43s.xml">
@@ -361,18 +362,34 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="53" column="1" lean-forward="true" selection-start-line="53" selection-start-column="1" selection-end-line="53" selection-end-column="1" />
+        <state relative-caret-position="728">
+          <caret line="52" column="0" lean-forward="true" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
           <folding>
             <element signature="e#12#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/lib/go-1.6/src/encoding/binary/binary.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="589">
+          <caret line="83" column="0" lean-forward="true" selection-start-line="83" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/go-1.6/src/crypto/sha256/sha256.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="232">
+          <caret line="137" column="17" lean-forward="false" selection-start-line="137" selection-start-column="17" selection-end-line="137" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="141" column="22" lean-forward="true" selection-start-line="141" selection-start-column="22" selection-end-line="141" selection-end-column="22" />
+        <state relative-caret-position="95">
+          <caret line="142" column="0" lean-forward="true" selection-start-line="142" selection-start-column="0" selection-end-line="142" selection-end-column="0" />
           <folding>
             <element signature="e#13#147#0" expanded="true" />
           </folding>
