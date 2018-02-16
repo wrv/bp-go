@@ -52,3 +52,31 @@ func TestVectorPCommit3(t *testing.T) {
 func TestInnerProductProve(t *testing.T) {
 
 }
+
+
+func TestInnerProduct(t *testing.T) {
+	a := make([]*big.Int, 5)
+	b := make([]*big.Int, 5)
+
+	a[0] = big.NewInt(2)
+	a[1] = big.NewInt(2)
+	a[2] = big.NewInt(2)
+	a[3] = big.NewInt(2)
+	a[4] = big.NewInt(2)
+
+	b[0] = big.NewInt(2)
+	b[1] = big.NewInt(2)
+	b[2] = big.NewInt(2)
+	b[3] = big.NewInt(2)
+	b[4] = big.NewInt(2)
+
+	c := InnerProduct(a, b)
+
+	if c.Cmp(big.NewInt(20)) == 0 {
+		println("Success - Innerproduct works with 2")
+	} else{
+		println("Failure - Innerproduct equal to ")
+		println(c.String())
+	}
+
+}

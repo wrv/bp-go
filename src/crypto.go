@@ -10,7 +10,6 @@ import (
 	"math/big"
 
 	"github.com/btcsuite/btcd/btcec"
-	"container/list"
 )
 
 var CP CryptoParams
@@ -22,6 +21,10 @@ Implementation of BulletProofs
 
 type ECPoint struct {
 	X, Y *big.Int
+}
+
+func ECZero() ECPoint{
+	return ECPoint{big.NewInt(0), big.NewInt(0)}
 }
 
 // Equal returns true if points p (self) and p2 (arg) are the same.
@@ -113,7 +116,11 @@ type BulletProof struct {
 
 func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 
-	c := big.NewInt(1)
+	c := big.NewInt(0)
+
+	for i := range a{
+		c = new(big.Int).Add(c, new(big.Int).Mul(a[i], b[i]))
+	}
 
 	return new(big.Int).Mod(c, CP.C.Params().P)
 }
@@ -139,7 +146,7 @@ func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPo
 
 
 
-	return BulletProof{}
+	return BulletProof{ECZero(), ECZero(), cl, cr}
 }
 
 
