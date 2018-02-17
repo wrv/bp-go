@@ -181,7 +181,7 @@ Proves that <a,b>=c
 This is a building block for BulletProofs
 
 */
-func InnerProductProveSub(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) InnerProdProof {
+func InnerProductProveSub(G, H []ECPoint, a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) InnerProdProof {
 	if len(a) == len(b) && len(a) ==1{
 		// Prover sends a & b
 		return InnerProdProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, a[0], b[0]}
@@ -197,18 +197,38 @@ func InnerProductProveSub(a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P E
 
 func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, P ECPoint) InnerProdProof{
 	// randomly generate an x value from public data
-	x := sha256.Sum256(a[0].Bytes()) // TODO: FIXME
+	x := sha256.Sum256(a[0].Bytes()) // TODO: FIXME BASED ON PUBLIC DATA
 
 	Pprime := P.Add(CP.U.Mult(new(big.Int).Mul(new(big.Int).SetBytes(x[:]), c)))
 	ux := CP.U.Mult(new(big.Int).SetBytes(x[:]))
-	return InnerProductProveSub(a, b, c, ux, Pprime)
+
+	return InnerProductProveSub(CP.G, CP.H, a, b, c, ux, Pprime)
 }
 
+/* Inner Product Verify
+Given a inner product proof, verifies the correctness of the proof
 
+Since we're using the Fiat-Shamir transform, we need to verify all x hash computations,
+all g' and h' computations
+
+ */
 func InnerProductVerify(ipp InnerProdProof) bool{
 
 
 	return false
+}
+
+type RangeProof struct {
+
+}
+
+
+func RPProve(v *big.Int) RangeProof {
+
+	// break up v into its bitwise representation
+	//aL := 0
+
+	return RangeProof{}
 }
 
 // NewECPrimeGroupKey returns the curve (field),
