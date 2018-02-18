@@ -6,14 +6,13 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
-	"fmt"
 	"math/big"
 
 	"github.com/btcsuite/btcd/btcec"
 )
 
 var CP CryptoParams
-var VecLength = 1
+var VecLength = 4
 /*
 Implementation of BulletProofs
 
@@ -152,15 +151,6 @@ func TwoVectorPCommitWithGens(G,H []ECPoint, a, b []*big.Int) (ECPoint) {
 }
 
 
-
-type InnerProdProof struct {
-	L 	ECPoint
-	R 	ECPoint
-	a	*big.Int
-	b 	*big.Int
-}
-
-
 // The length here always has to be a power of two
 func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 
@@ -173,6 +163,65 @@ func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 	return new(big.Int).Mod(c, CP.C.Params().P)
 }
 
+func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
+	result := make([]*big.Int, len(v))
+
+	for i := range v{
+		result[i] = new(big.Int).Mod(new(big.Int).Add(v[i], w[i]), CP.N)
+	}
+
+	return result
+}
+
+func ScalarVectorMul(v []*big.Int, s *big.Int) []*big.Int {
+
+	result := make([]*big.Int, len(v))
+
+	for i := range v{
+		result[i] = new(big.Int).Mod(new(big.Int).Mul(v[i], s), CP.N)
+	}
+
+	return result
+}
+
+
+/*
+InnerProd Proof
+
+This stores the argument values
+
+TODO: Find a way to store the transcript
+ */
+type InnerProdProof struct {
+	L 	ECPoint
+	R 	ECPoint
+	P	ECPoint
+	a	*big.Int
+	b 	*big.Int
+}
+
+
+
+func GenerateNewParams(G, H []ECPoint, x *big.Int, L, R, P ECPoint) ([]ECPoint, []ECPoint, ECPoint){
+	nprime := len(G)/2
+
+	Gprime := make([]ECPoint, nprime)
+	Hprime := make([]ECPoint, nprime)
+
+	xinv := new(big.Int).ModInverse(x, CP.N)
+
+	// Gprime = xinv * G[:nprime] + x*G[nprime:]
+	// Hprime = x * H[:nprime] + xinv*H[nprime:]
+
+	for i := range Gprime {
+		Gprime[i] = G[i].Mult(xinv).Add(G[i+nprime].Mult(x))
+		Hprime[i] = H[i].Mult(x).Add(H[i+nprime].Mult(xinv))
+	}
+
+	Pprime := L.Mult(new(big.Int).Mul(x, x)).Add(P).Add(R.Mult(new(big.Int).Mul(xinv, xinv))) // x^2 * L + P + xinv^2 * R
+
+	return Gprime, Hprime, Pprime
+}
 
 /* Inner Product Argument
 
@@ -181,28 +230,44 @@ Proves that <a,b>=c
 This is a building block for BulletProofs
 
 */
-func InnerProductProveSub(G, H []ECPoint, a []*big.Int, b []*big.Int, c *big.Int, u ECPoint, P ECPoint) InnerProdProof {
-	if len(a) == len(b) && len(a) ==1{
+func InnerProductProveSub(G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint, P ECPoint) InnerProdProof {
+	if len(a) == 1{
 		// Prover sends a & b
-		return InnerProdProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, a[0], b[0]}
+		return InnerProdProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, P, a[0], b[0]}
 	}
 
 	nprime := len(a)/2
-
+	//println(nprime)
+	//println(len(H))
 	cl := InnerProduct(a[:nprime], b[nprime:])
 	cr := InnerProduct(a[nprime:], b[:nprime])
+	L := TwoVectorPCommitWithGens(G[nprime:], H[:nprime], a[:nprime], b[nprime:]).Add(u.Mult(cl))
+	R := TwoVectorPCommitWithGens(G[:nprime], H[nprime:], a[nprime:], b[:nprime]).Add(u.Mult(cr))
 
-	return InnerProdProof{CP.Zero(), CP.Zero(), cl, cr}
+	// prover sends L & R and gets a challenge
+	s256 := sha256.Sum256([]byte(
+				L.X.String() + L.Y.String() +
+				R.X.String() + R.Y.String()))
+
+	x := new(big.Int).SetBytes(s256[:])
+
+	Gprime, Hprime, Pprime := GenerateNewParams(G, H, x, L, R, P)
+
+	xinv := new(big.Int).ModInverse(x, CP.N)
+	aprime := VectorAdd(ScalarVectorMul(a[:nprime], x), ScalarVectorMul(a[nprime:], xinv))
+	bprime := VectorAdd(ScalarVectorMul(b[:nprime], xinv), ScalarVectorMul(b[nprime:], x))
+
+	return InnerProductProveSub(Gprime, Hprime, aprime, bprime, u, Pprime)
 }
 
 func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, P ECPoint) InnerProdProof{
 	// randomly generate an x value from public data
-	x := sha256.Sum256(a[0].Bytes()) // TODO: FIXME BASED ON PUBLIC DATA
+	x := sha256.Sum256([]byte(P.X.String() + P.Y.String())) // TODO: FIXME BASED ON PUBLIC DATA
 
 	Pprime := P.Add(CP.U.Mult(new(big.Int).Mul(new(big.Int).SetBytes(x[:]), c)))
 	ux := CP.U.Mult(new(big.Int).SetBytes(x[:]))
 
-	return InnerProductProveSub(CP.G, CP.H, a, b, c, ux, Pprime)
+	return InnerProductProveSub(CP.G, CP.H, a, b, ux, Pprime)
 }
 
 /* Inner Product Verify
@@ -214,12 +279,34 @@ all g' and h' computations
  */
 func InnerProductVerify(ipp InnerProdProof) bool{
 
+	 //challenge1 := sha256.Sum256([]byte(ipp.L.X.String() + ipp.L.Y.String() + ipp.R.X.String() + ipp.R.Y.String()))
+
+	 //Gprime, Hprime, Pprime := GenerateNewParams(CP.G, CP.H, new(big.Int).SetBytes(challenge1[:]), ipp.L, ipp.R, ipp.P)
+
+
 
 	return false
 }
 
 type RangeProof struct {
+	A		ECPoint
+	S 		ECPoint
+	T1 		ECPoint
+	T2		ECPoint
+	L 		[]ECPoint
+	R 		[]ECPoint
+	tau 	*big.Int
+	th 		*big.Int
+	mu 		*big.Int
+	a 		*big.Int
+	b 		*big.Int
 
+	// challenges
+	cy 		*big.Int
+	cz 		*big.Int
+	cx 		*big.Int
+	cxu 	*big.Int
+	cxi 	[]*big.Int
 }
 
 
@@ -231,6 +318,13 @@ func RPProve(v *big.Int) RangeProof {
 	return RangeProof{}
 }
 
+func RPVerify(rp RangeProof) bool {
+	// verify the challenges
+
+
+	return false
+}
+
 // NewECPrimeGroupKey returns the curve (field),
 // Generator 1 x&y, Generator 2 x&y, order of the generators
 func NewECPrimeGroupKey(n int) CryptoParams {
@@ -240,10 +334,10 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 	gen2Vals := make([]ECPoint, n)
 	u := ECPoint{big.NewInt(0), big.NewInt(0)}
 
-	i := 0;
+	j := 0;
 	confirmed := 0;
 	for confirmed < (2*n + 1) {
-		s256.Write(new(big.Int).Add(curValue, big.NewInt(int64(i))).Bytes())
+		s256.Write(new(big.Int).Add(curValue, big.NewInt(int64(j))).Bytes())
 
 		potentialXValue := make([]byte, 33)
 		binary.LittleEndian.PutUint32(potentialXValue, 2)
@@ -255,16 +349,19 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 		if err == nil{
 			if confirmed == 2*n{ // once we've generated all g and h values then assign this to u
 				u = ECPoint{gen2.X, gen2.Y}
+				//println("Got that U value")
 			} else {
 				if confirmed%2 == 0 {
 					gen1Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
+					//println("new G Value")
 				} else {
 					gen2Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
+					//println("new H value")
 				}
 			}
 			confirmed += 1;
 		}
-		i += 1;
+		j += 1;
 	}
 
 	return CryptoParams{
@@ -281,5 +378,5 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 
 func init() {
 	CP = NewECPrimeGroupKey(VecLength)
-	fmt.Println(CP)
+	//fmt.Println(CP)
 }
