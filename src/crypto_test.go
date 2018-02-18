@@ -5,8 +5,35 @@ import (
 	"math/big"
 )
 
-func TestInnerProductProve(t *testing.T) {
+func TestInnerProductProveLen2(t *testing.T) {
 	println("TestInnerProductProve")
+	CP = NewECPrimeGroupKey(2)
+	a := make([]*big.Int, 2)
+	b := make([]*big.Int, 2)
+
+	a[0] = big.NewInt(2)
+	a[1] = big.NewInt(2)
+
+	b[0] = big.NewInt(2)
+	b[1] = big.NewInt(2)
+
+	c := big.NewInt(8)
+
+	P := TwoVectorPCommit(a, b)
+
+	ipp := InnerProductProve(a, b, c, P)
+
+	if InnerProductVerify(c, P, ipp){
+		println("Inner Product Proof correct")
+	} else {
+		println("Inner Product Proof incorrect")
+	}
+}
+
+
+func TestInnerProductProveLen4(t *testing.T) {
+	println("TestInnerProductProve")
+	CP = NewECPrimeGroupKey(4)
 	a := make([]*big.Int, 4)
 	b := make([]*big.Int, 4)
 
@@ -26,7 +53,7 @@ func TestInnerProductProve(t *testing.T) {
 
 	ipp := InnerProductProve(a, b, c, P)
 
-	if InnerProductVerify(P, ipp){
+	if InnerProductVerify(c, P, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -36,7 +63,7 @@ func TestInnerProductProve(t *testing.T) {
 
 func TestVectorPCommit3(t *testing.T) {
 	println("TestVectorPCommit3")
-	CP = NewECPrimeGroupKey(3)
+	CP := NewECPrimeGroupKey(3)
 
 	v := make([]*big.Int, 3)
 	for j := range v {

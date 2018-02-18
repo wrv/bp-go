@@ -15,7 +15,7 @@ import (
 )
 
 var CP CryptoParams
-var VecLength = 4
+var VecLength = 2
 /*
 Implementation of BulletProofs
 
@@ -263,7 +263,7 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 	proof.x[curIt] = x
 
 	Gprime, Hprime, Pprime := GenerateNewParams(G, H, x, L, R, P)
-
+	//fmt.Printf("Prover - Intermediate Pprime value: %s \n", Pprime)
 	xinv := new(big.Int).ModInverse(x, CP.N)
 	aprime := VectorAdd(ScalarVectorMul(a[:nprime], x), ScalarVectorMul(a[nprime:], xinv))
 	bprime := VectorAdd(ScalarVectorMul(b[:nprime], xinv), ScalarVectorMul(b[nprime:], x))
@@ -292,7 +292,7 @@ func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, P ECPoint) InnerP
 
 	Pprime := P.Add(CP.U.Mult(new(big.Int).Mul(new(big.Int).SetBytes(x[:]), c)))
 	ux := CP.U.Mult(new(big.Int).SetBytes(x[:]))
-
+	//fmt.Printf("Prover Pprime value to run sub off of: %s\n", Pprime)
 	return InnerProductProveSub(runningProof, CP.G, CP.H, a, b, ux, Pprime)
 }
 
@@ -306,9 +306,9 @@ P : the Pedersen commitment we are verifying is a commitment to the innner produ
 ipp : the proof
 
  */
-func InnerProductVerify(P ECPoint, ipp InnerProdArg) bool{
-	 fmt.Println(ipp)
-	 fmt.Println(P)
+func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
+	fmt.Println("Verifying Inner Product Argument")
+	 fmt.Printf("Commitment Value: %s \n", P)
 	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
 	 chal1 := new(big.Int).SetBytes(s1[:])
 	 curIt := len(ipp.x)-1
@@ -322,7 +322,8 @@ func InnerProductVerify(P ECPoint, ipp InnerProdArg) bool{
 
 	 Gprime := CP.G
 	 Hprime := CP.H
-	 Pprime := P
+	 Pprime := P.Add(CP.U.Mult(new(big.Int).Mul(chal1, c))) // line 6 from protocol 1
+	 //fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
 	 for curIt >= 0 {
 	 	Lval := ipp.L[curIt]
 	 	Rval := ipp.R[curIt]
@@ -344,11 +345,11 @@ func InnerProductVerify(P ECPoint, ipp InnerProdArg) bool{
 	 	curIt -= 1
 	 }
 
-	c := new(big.Int).Mul(ipp.a, ipp.b)
+	ccalc := new(big.Int).Mul(ipp.a, ipp.b)
 
-	Pcalc := Gprime[0].Mult(ipp.a).Add(Hprime[0].Mult(ipp.b)).Add(CP.U.Mult(new(big.Int).Mul(chal1, c)))
-	fmt.Println(Pprime)
-	fmt.Println(Pcalc)
+	Pcalc := Gprime[0].Mult(ipp.a).Add(Hprime[0].Mult(ipp.b)).Add(CP.U.Mult(new(big.Int).Mul(chal1, ccalc)))
+	fmt.Printf("Final Pprime value: %s \n", Pprime)
+	fmt.Printf("Calculated Pprime value to check against: %s \n", Pcalc)
 
 	if !Pprime.Equal(Pcalc) {
 		println("IPVerify - Final Commitment checking failed")

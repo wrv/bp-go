@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="370c4cb5-3c12-4ff5-a881-a74423052a43" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/src/crypto.go" afterPath="$PROJECT_DIR$/src/crypto.go" />
+      <change beforePath="$PROJECT_DIR$/src/crypto_test.go" afterPath="$PROJECT_DIR$/src/crypto_test.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,8 +18,8 @@
       <file leaf-file-name="crypto.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/crypto.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="436">
-              <caret line="291" column="0" lean-forward="true" selection-start-line="291" selection-start-column="0" selection-end-line="291" selection-end-column="0" />
+            <state relative-caret-position="727">
+              <caret line="448" column="0" lean-forward="true" selection-start-line="448" selection-start-column="0" selection-end-line="448" selection-end-column="0" />
               <folding>
                 <element signature="e#13#166#0" expanded="true" />
               </folding>
@@ -38,8 +40,8 @@
       <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="24" column="31" lean-forward="true" selection-start-line="24" selection-start-column="31" selection-end-line="24" selection-end-column="31" />
+            <state relative-caret-position="98">
+              <caret line="7" column="20" lean-forward="false" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
               <folding>
                 <element signature="e#12#45#0" expanded="true" />
               </folding>
@@ -59,6 +61,8 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>CP.</find>
+      <find>fmt.Println</find>
+      <find>fmt.Printf</find>
     </findStrings>
   </component>
   <component name="GOROOT" path="/usr/lib/go-1.6" />
@@ -70,8 +74,8 @@
       <list>
         <option value="$PROJECT_DIR$/src/Crypto.go" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/crypto_test.go" />
         <option value="$PROJECT_DIR$/src/crypto.go" />
+        <option value="$PROJECT_DIR$/src/crypto_test.go" />
       </list>
     </option>
   </component>
@@ -141,7 +145,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.TestInnerProductProve in crypto_test.go">
+  <component name="RunManager" selected="Go Test.TestInnerProductProveLen4 in crypto_test.go">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -168,23 +172,23 @@
       <package value="github.com/wrv/bp-go/src" />
       <pattern value="^TestInnerProductProve$" />
     </configuration>
-    <configuration name="TestVectorPCommit3 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="TestInnerProductProveLen2 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/src" />
       <go_parameters value="-i" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="github.com/wrv/bp-go/src" />
-      <pattern value="^TestVectorPCommit3$" />
+      <pattern value="^TestInnerProductProveLen2$" />
     </configuration>
-    <configuration name="TestVerifyParamGeneration in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="TestInnerProductProveLen4 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/src" />
       <go_parameters value="-i" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="github.com/wrv/bp-go/src" />
-      <pattern value="^TestVerifyParamGeneration$" />
+      <pattern value="^TestInnerProductProveLen4$" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="bp-go" />
@@ -202,19 +206,19 @@
       <package value="github.com/wrv/bp-go/src" />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Go Test.TestVerifyParamGeneration in crypto_test.go" />
-      <item index="1" class="java.lang.String" itemvalue="Go Test.TestVectorPCommit3 in crypto_test.go" />
-      <item index="2" class="java.lang.String" itemvalue="Go Test.TestInnerProduct in crypto_test.go" />
-      <item index="3" class="java.lang.String" itemvalue="Go Test.TestInnerProductProve in crypto_test.go" />
-      <item index="4" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
+      <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProduct in crypto_test.go" />
+      <item index="1" class="java.lang.String" itemvalue="Go Test.TestInnerProductProve in crypto_test.go" />
+      <item index="2" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
+      <item index="3" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen2 in crypto_test.go" />
+      <item index="4" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen4 in crypto_test.go" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProductProve in crypto_test.go" />
-        <item index="1" class="java.lang.String" itemvalue="Go Test.TestInnerProduct in crypto_test.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
-        <item index="3" class="java.lang.String" itemvalue="Go Test.TestVectorPCommit3 in crypto_test.go" />
-        <item index="4" class="java.lang.String" itemvalue="Go Test.TestVerifyParamGeneration in crypto_test.go" />
+        <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen4 in crypto_test.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen2 in crypto_test.go" />
+        <item index="2" class="java.lang.String" itemvalue="Go Test.TestInnerProductProve in crypto_test.go" />
+        <item index="3" class="java.lang.String" itemvalue="Go Test.TestInnerProduct in crypto_test.go" />
+        <item index="4" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
       </list>
     </recent_temporary>
   </component>
@@ -222,35 +226,35 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TestHistory">
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 22h 33m 35s.xml">
+    <history-entry file="TestInnerProductProveLen2_in_crypto_test_go - 2018.02.18 at 17h 04m 21s.xml">
+      <configuration name="TestInnerProductProveLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 17h 04m 28s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 18m 01s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 22h 34m 23s.xml">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 19m 59s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 22h 34m 35s.xml">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 20m 45s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 22h 41m 21s.xml">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 23m 23s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 22h 52m 12s.xml">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 24m 13s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 22h 58m 01s.xml">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 24m 54s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 23h 00m 04s.xml">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 37m 43s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 23h 01m 42s.xml">
+    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.18 at 16h 49m 02s.xml">
       <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProve_in_crypto_test_go - 2018.02.17 at 23h 02m 35s.xml">
-      <configuration name="TestInnerProductProve in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProduct_in_crypto_test_go - 2018.02.17 at 22h 39m 22s.xml">
-      <configuration name="TestInnerProduct in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -452,8 +456,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="24" column="31" lean-forward="true" selection-start-line="24" selection-start-column="31" selection-end-line="24" selection-end-column="31" />
+        <state relative-caret-position="98">
+          <caret line="7" column="20" lean-forward="false" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
           <folding>
             <element signature="e#12#45#0" expanded="true" />
           </folding>
@@ -462,8 +466,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="436">
-          <caret line="291" column="0" lean-forward="true" selection-start-line="291" selection-start-column="0" selection-end-line="291" selection-end-column="0" />
+        <state relative-caret-position="727">
+          <caret line="448" column="0" lean-forward="true" selection-start-line="448" selection-start-column="0" selection-end-line="448" selection-end-column="0" />
           <folding>
             <element signature="e#13#166#0" expanded="true" />
           </folding>
