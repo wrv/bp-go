@@ -26,32 +26,13 @@ func TestInnerProductProve(t *testing.T) {
 
 	ipp := InnerProductProve(a, b, c, P)
 
-	if InnerProductVerify(ipp){
+	if InnerProductVerify(P, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
 	}
 }
 
-
-func TestVerifyParamGeneration(t *testing.T){
-	println("TestVerifyParamGeneration")
-	CP2 := NewECPrimeGroupKey(2)
-
-	if len(CP2.G) != len(CP2.H) {
-		println("Failure - 2 param")
-	} else {
-		println("Success - 2 param")
-	}
-
-	CP3 := NewECPrimeGroupKey(3)
-
-	if len(CP3.G) != len(CP3.H) {
-		println("Failure - 3 param")
-	} else {
-		println("Success - 3 param")
-	}
-}
 
 func TestVectorPCommit3(t *testing.T) {
 	println("TestVectorPCommit3")

@@ -9,6 +9,8 @@ import (
 	"math/big"
 
 	"github.com/btcsuite/btcd/btcec"
+	"math"
+	"strconv"
 )
 
 var CP CryptoParams
@@ -190,12 +192,11 @@ InnerProd Proof
 
 This stores the argument values
 
-TODO: Find a way to store the transcript
  */
-type InnerProdProof struct {
-	L 	ECPoint
-	R 	ECPoint
-	P	ECPoint
+type InnerProdArg struct {
+	L 	[]ECPoint
+	R 	[]ECPoint
+	x 	[]*big.Int
 	a	*big.Int
 	b 	*big.Int
 }
@@ -230,11 +231,15 @@ Proves that <a,b>=c
 This is a building block for BulletProofs
 
 */
-func InnerProductProveSub(G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint, P ECPoint) InnerProdProof {
+func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint, P ECPoint) InnerProdArg {
 	if len(a) == 1{
 		// Prover sends a & b
-		return InnerProdProof{ECPoint{big.NewInt(0),big.NewInt(0)}, ECPoint{big.NewInt(0),big.NewInt(0)}, P, a[0], b[0]}
+		proof.a = a[0]
+		proof.b = b[0]
+		return proof
 	}
+
+	curIt := int(math.Log2(float64(len(a))))-1
 
 	nprime := len(a)/2
 	//println(nprime)
@@ -244,6 +249,9 @@ func InnerProductProveSub(G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint,
 	L := TwoVectorPCommitWithGens(G[nprime:], H[:nprime], a[:nprime], b[nprime:]).Add(u.Mult(cl))
 	R := TwoVectorPCommitWithGens(G[:nprime], H[nprime:], a[nprime:], b[:nprime]).Add(u.Mult(cr))
 
+	proof.L[curIt] = L
+	proof.R[curIt] = R
+
 	// prover sends L & R and gets a challenge
 	s256 := sha256.Sum256([]byte(
 				L.X.String() + L.Y.String() +
@@ -251,23 +259,40 @@ func InnerProductProveSub(G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint,
 
 	x := new(big.Int).SetBytes(s256[:])
 
+	proof.x[curIt] = x
+
 	Gprime, Hprime, Pprime := GenerateNewParams(G, H, x, L, R, P)
 
 	xinv := new(big.Int).ModInverse(x, CP.N)
 	aprime := VectorAdd(ScalarVectorMul(a[:nprime], x), ScalarVectorMul(a[nprime:], xinv))
 	bprime := VectorAdd(ScalarVectorMul(b[:nprime], xinv), ScalarVectorMul(b[nprime:], x))
 
-	return InnerProductProveSub(Gprime, Hprime, aprime, bprime, u, Pprime)
+	return InnerProductProveSub(proof, Gprime, Hprime, aprime, bprime, u, Pprime)
 }
 
-func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, P ECPoint) InnerProdProof{
+func InnerProductProve(a []*big.Int, b []*big.Int, c *big.Int, P ECPoint) InnerProdArg {
+	loglen := int(math.Log2(float64(len(a))))
+
+	challenges := make([]*big.Int, loglen+1)
+	Lvals := make([]ECPoint, loglen)
+	Rvals := make([]ECPoint, loglen)
+
+	runningProof := InnerProdArg{
+		Lvals,
+		Rvals,
+		challenges,
+		big.NewInt(0),
+		big.NewInt(0)}
+
 	// randomly generate an x value from public data
-	x := sha256.Sum256([]byte(P.X.String() + P.Y.String())) // TODO: FIXME BASED ON PUBLIC DATA
+	x := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
+
+	runningProof.x[loglen] = new(big.Int).SetBytes(x[:])
 
 	Pprime := P.Add(CP.U.Mult(new(big.Int).Mul(new(big.Int).SetBytes(x[:]), c)))
 	ux := CP.U.Mult(new(big.Int).SetBytes(x[:]))
 
-	return InnerProductProveSub(CP.G, CP.H, a, b, ux, Pprime)
+	return InnerProductProveSub(runningProof, CP.G, CP.H, a, b, ux, Pprime)
 }
 
 /* Inner Product Verify
@@ -276,16 +301,66 @@ Given a inner product proof, verifies the correctness of the proof
 Since we're using the Fiat-Shamir transform, we need to verify all x hash computations,
 all g' and h' computations
 
+P : the Pedersen commitment we are verifying is a commitment to the innner product
+ipp : the proof
+
  */
-func InnerProductVerify(ipp InnerProdProof) bool{
+func InnerProductVerify(P ECPoint, ipp InnerProdArg) bool{
 
 	 //challenge1 := sha256.Sum256([]byte(ipp.L.X.String() + ipp.L.Y.String() + ipp.R.X.String() + ipp.R.Y.String()))
 
 	 //Gprime, Hprime, Pprime := GenerateNewParams(CP.G, CP.H, new(big.Int).SetBytes(challenge1[:]), ipp.L, ipp.R, ipp.P)
 
+	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
+	 chal1 := new(big.Int).SetBytes(s1[:])
+	 curIt := len(ipp.x)-1
+
+	 if ipp.x[curIt].Cmp(chal1) != 0 {
+	 	println("IPVerify - Initial Challenge Failed")
+	 	return false
+	 }
+
+	 curIt -= 1
+
+	 Gprime := CP.G
+	 Hprime := CP.H
+	 Pprime := P
+	 for curIt >= 0 {
+	 	Lval := ipp.L[curIt]
+	 	Rval := ipp.R[curIt]
+
+		 // prover sends L & R and gets a challenge
+		 s256 := sha256.Sum256([]byte(
+			 Lval.X.String() + Lval.Y.String() +
+				 Rval.X.String() + Rval.Y.String()))
+
+		 chal2 := new(big.Int).SetBytes(s256[:])
+
+		 if ipp.x[curIt].Cmp(chal2) != 0 {
+		 	println("IPVerify - Challenge verification failed at index " + strconv.Itoa(curIt))
+		 	return false
+		 }
+
+		 Gprime, Hprime, Pprime = GenerateNewParams(Gprime, Hprime, chal2, Lval, Rval, Pprime)
+
+	 	curIt -= 1
+	 }
+
+	 println(len(Gprime))
+	 println(len(Hprime))
+
+	c := new(big.Int).Mul(ipp.a, ipp.b)
+
+	Pcalc := Gprime[0].Mult(ipp.a).Add(Hprime[0].Mult(ipp.b)).Add(CP.U.Mult(new(big.Int).Mul(chal1, c)))
 
 
-	return false
+	if !Pprime.Equal(Pcalc) {
+		println("IPVerify - Final Commitment checking failed")
+		return false
+	}
+
+
+	return true
 }
 
 type RangeProof struct {
