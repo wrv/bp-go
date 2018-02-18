@@ -11,6 +11,7 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"math"
 	"strconv"
+	"fmt"
 )
 
 var CP CryptoParams
@@ -306,11 +307,8 @@ ipp : the proof
 
  */
 func InnerProductVerify(P ECPoint, ipp InnerProdArg) bool{
-
-	 //challenge1 := sha256.Sum256([]byte(ipp.L.X.String() + ipp.L.Y.String() + ipp.R.X.String() + ipp.R.Y.String()))
-
-	 //Gprime, Hprime, Pprime := GenerateNewParams(CP.G, CP.H, new(big.Int).SetBytes(challenge1[:]), ipp.L, ipp.R, ipp.P)
-
+	 fmt.Println(ipp)
+	 fmt.Println(P)
 	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
 	 chal1 := new(big.Int).SetBytes(s1[:])
 	 curIt := len(ipp.x)-1
@@ -346,13 +344,11 @@ func InnerProductVerify(P ECPoint, ipp InnerProdArg) bool{
 	 	curIt -= 1
 	 }
 
-	 println(len(Gprime))
-	 println(len(Hprime))
-
 	c := new(big.Int).Mul(ipp.a, ipp.b)
 
 	Pcalc := Gprime[0].Mult(ipp.a).Add(Hprime[0].Mult(ipp.b)).Add(CP.U.Mult(new(big.Int).Mul(chal1, c)))
-
+	fmt.Println(Pprime)
+	fmt.Println(Pcalc)
 
 	if !Pprime.Equal(Pcalc) {
 		println("IPVerify - Final Commitment checking failed")
