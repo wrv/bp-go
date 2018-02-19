@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="370c4cb5-3c12-4ff5-a881-a74423052a43" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/src/crypto.go" afterPath="$PROJECT_DIR$/src/crypto.go" />
-      <change beforePath="$PROJECT_DIR$/src/crypto_test.go" afterPath="$PROJECT_DIR$/src/crypto_test.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -12,13 +12,16 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/bp_go$TestInnerProductProveLen4_in_crypto_test_go.coverage" NAME="TestInnerProductProveLen4 in crypto_test.go Coverage Results" MODIFIED="1519013988969" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="GoCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="crypto.go" pinned="false" current-in-tab="false">
+      <file leaf-file-name="crypto.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/crypto.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="265">
-              <caret line="353" column="54" lean-forward="false" selection-start-line="353" selection-start-column="54" selection-end-line="353" selection-end-column="54" />
+            <state relative-caret-position="363">
+              <caret line="292" column="0" lean-forward="true" selection-start-line="292" selection-start-column="0" selection-end-line="292" selection-end-column="0" />
               <folding>
                 <element signature="e#13#166#0" expanded="true" />
               </folding>
@@ -36,11 +39,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="60" column="28" lean-forward="true" selection-start-line="60" selection-start-column="28" selection-end-line="60" selection-end-column="28" />
+            <state relative-caret-position="378">
+              <caret line="69" column="24" lean-forward="true" selection-start-line="69" selection-start-column="24" selection-end-line="69" selection-end-column="24" />
               <folding>
                 <element signature="e#12#52#0" expanded="true" />
               </folding>
@@ -226,35 +229,35 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TestHistory">
-    <history-entry file="TestInnerProductProveLen1_in_crypto_test_go - 2018.02.18 at 18h 05m 46s.xml">
+    <history-entry file="TestInnerProductProveLen1_in_crypto_test_go - 2018.02.18 at 22h 17m 44s.xml">
       <configuration name="TestInnerProductProveLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProveLen1_in_crypto_test_go - 2018.02.18 at 18h 05m 55s.xml">
-      <configuration name="TestInnerProductProveLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen1_in_crypto_test_go - 2018.02.18 at 18h 48m 37s.xml">
-      <configuration name="TestInnerProductProveLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen2_in_crypto_test_go - 2018.02.18 at 18h 05m 48s.xml">
+    <history-entry file="TestInnerProductProveLen2_in_crypto_test_go - 2018.02.18 at 22h 17m 54s.xml">
       <configuration name="TestInnerProductProveLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProveLen2_in_crypto_test_go - 2018.02.18 at 18h 48m 41s.xml">
-      <configuration name="TestInnerProductProveLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 18h 48m 31s.xml">
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 17m 31s.xml">
       <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 18h 48m 44s.xml">
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 18m 06s.xml">
       <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.18 at 18h 07m 31s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 19m 42s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.18 at 18h 10m 28s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 19m 49s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.18 at 18h 11m 06s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 37m 19s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 38m 35s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 23h 02m 03s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 23h 06m 00s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -267,10 +270,11 @@
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32972974" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32977018" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3045045" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -288,7 +292,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="2" />
+      <option name="time" value="3" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -454,22 +458,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/crypto.go">
+    <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="265">
-          <caret line="353" column="54" lean-forward="false" selection-start-line="353" selection-start-column="54" selection-end-line="353" selection-end-column="54" />
+        <state relative-caret-position="378">
+          <caret line="69" column="24" lean-forward="true" selection-start-line="69" selection-start-column="24" selection-end-line="69" selection-end-column="24" />
           <folding>
-            <element signature="e#13#166#0" expanded="true" />
+            <element signature="e#12#52#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
+    <entry file="file://$PROJECT_DIR$/src/crypto.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="60" column="28" lean-forward="true" selection-start-line="60" selection-start-column="28" selection-end-line="60" selection-end-column="28" />
+        <state relative-caret-position="363">
+          <caret line="292" column="0" lean-forward="true" selection-start-line="292" selection-start-column="0" selection-end-line="292" selection-end-column="0" />
           <folding>
-            <element signature="e#12#52#0" expanded="true" />
+            <element signature="e#13#166#0" expanded="true" />
           </folding>
         </state>
       </provider>

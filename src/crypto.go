@@ -230,6 +230,7 @@ This is a building block for BulletProofs
 
 */
 func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint, P ECPoint) InnerProdArg {
+	fmt.Printf("Proof so far: %s\n", proof)
 	if len(a) == 1{
 		// Prover sends a & b
 		fmt.Printf("a: %d && b: %d\n", a[0], b[0])
@@ -313,6 +314,7 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 	 fmt.Printf("Commitment Value: %s \n", P)
 	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
 	 chal1 := new(big.Int).SetBytes(s1[:])
+	 ux := CP.U.Mult(chal1)
 	 curIt := len(ipp.x)-1
 
 	 if ipp.x[curIt].Cmp(chal1) != 0 {
@@ -324,8 +326,9 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 
 	 Gprime := CP.G
 	 Hprime := CP.H
-	 Pprime := P.Add(CP.U.Mult(new(big.Int).Mul(chal1, c))) // line 6 from protocol 1
-	 //fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
+	 Pprime := P.Add(ux.Mult(c)) // line 6 from protocol 1
+	 fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
+
 	 for curIt >= 0 {
 	 	Lval := ipp.L[curIt]
 	 	Rval := ipp.R[curIt]
@@ -343,16 +346,14 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 		 }
 
 		 Gprime, Hprime, Pprime = GenerateNewParams(Gprime, Hprime, chal2, Lval, Rval, Pprime)
-
 	 	curIt -= 1
 	 }
-
 	ccalc := new(big.Int).Mod(new(big.Int).Mul(ipp.a, ipp.b), CP.N)
 
 	Pcalc1 := Gprime[0].Mult(ipp.a)
-	Pcalc2 := Pcalc1.Add(Hprime[0].Mult(ipp.b))
-	Pcalc3 := CP.U.Mult(new(big.Int).Mul(chal1, ccalc))
-	Pcalc := Pcalc2.Add(Pcalc3)
+	Pcalc2 := Hprime[0].Mult(ipp.b)
+	Pcalc3 := ux.Mult(ccalc)
+	Pcalc := Pcalc1.Add(Pcalc2).Add(Pcalc3)
 
 
 	fmt.Printf("Final Pprime value: %s \n", Pprime)
@@ -365,6 +366,16 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 
 
 	return true
+}
+
+// from here: https://play.golang.org/p/zciRZvD0Gr with a fix
+func PadLeft(str, pad string, l int) string {
+	strCopy := str
+	for len(strCopy) < l {
+		strCopy = pad + strCopy
+	}
+
+	return strCopy
 }
 
 type RangeProof struct {
@@ -393,6 +404,9 @@ func RPProve(v *big.Int) RangeProof {
 
 	// break up v into its bitwise representation
 	//aL := 0
+	//aL := PadLeft(fmt.Sprintf("%b", v), "0", 64)
+
+
 
 	return RangeProof{}
 }
