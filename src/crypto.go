@@ -143,11 +143,7 @@ func TwoVectorPCommitWithGens(G,H []ECPoint, a, b []*big.Int) (ECPoint) {
 		modA := new(big.Int).Mod(a[i], CP.N)
 		modB := new(big.Int).Mod(b[i], CP.N)
 
-		// mG, rH
-		lhsX, lhsY := CP.C.ScalarMult(G[i].X, G[i].Y, modA.Bytes())
-		rhsX, rhsY := CP.C.ScalarMult(H[i].X, H[i].Y, modB.Bytes())
-
-		commitment = commitment.Add(ECPoint{lhsX, lhsY}).Add(ECPoint{rhsX, rhsY})
+		commitment = commitment.Add(G[i].Mult(modA)).Add(H[i].Mult(modB))
 	}
 
 	return commitment
@@ -177,7 +173,6 @@ func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
 }
 
 func ScalarVectorMul(v []*big.Int, s *big.Int) []*big.Int {
-
 	result := make([]*big.Int, len(v))
 
 	for i := range v{
@@ -202,8 +197,6 @@ type InnerProdArg struct {
 	b 	*big.Int
 }
 
-
-
 func GenerateNewParams(G, H []ECPoint, x *big.Int, L, R, P ECPoint) ([]ECPoint, []ECPoint, ECPoint){
 	nprime := len(G)/2
 
@@ -216,11 +209,15 @@ func GenerateNewParams(G, H []ECPoint, x *big.Int, L, R, P ECPoint) ([]ECPoint, 
 	// Hprime = x * H[:nprime] + xinv*H[nprime:]
 
 	for i := range Gprime {
+		//fmt.Printf("i: %d && i+nprime: %d\n", i, i+nprime)
 		Gprime[i] = G[i].Mult(xinv).Add(G[i+nprime].Mult(x))
 		Hprime[i] = H[i].Mult(x).Add(H[i+nprime].Mult(xinv))
 	}
 
-	Pprime := L.Mult(new(big.Int).Mul(x, x)).Add(P).Add(R.Mult(new(big.Int).Mul(xinv, xinv))) // x^2 * L + P + xinv^2 * R
+	x2 := new(big.Int).Mod(new(big.Int).Mul(x, x), CP.N)
+	xinv2 := new(big.Int).ModInverse(x2, CP.N)
+
+	Pprime := L.Mult(x2).Add(P).Add(R.Mult(xinv2)) // x^2 * L + P + xinv^2 * R
 
 	return Gprime, Hprime, Pprime
 }
@@ -235,6 +232,7 @@ This is a building block for BulletProofs
 func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint, P ECPoint) InnerProdArg {
 	if len(a) == 1{
 		// Prover sends a & b
+		fmt.Printf("a: %d && b: %d\n", a[0], b[0])
 		proof.a = a[0]
 		proof.b = b[0]
 		return proof
@@ -265,8 +263,12 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 	Gprime, Hprime, Pprime := GenerateNewParams(G, H, x, L, R, P)
 	//fmt.Printf("Prover - Intermediate Pprime value: %s \n", Pprime)
 	xinv := new(big.Int).ModInverse(x, CP.N)
-	aprime := VectorAdd(ScalarVectorMul(a[:nprime], x), ScalarVectorMul(a[nprime:], xinv))
-	bprime := VectorAdd(ScalarVectorMul(b[:nprime], xinv), ScalarVectorMul(b[nprime:], x))
+	aprime := VectorAdd(
+		ScalarVectorMul(a[:nprime], x),
+		ScalarVectorMul(a[nprime:], xinv))
+	bprime := VectorAdd(
+		ScalarVectorMul(b[:nprime], xinv),
+		ScalarVectorMul(b[nprime:], x))
 
 	return InnerProductProveSub(proof, Gprime, Hprime, aprime, bprime, u, Pprime)
 }
@@ -307,7 +309,7 @@ ipp : the proof
 
  */
 func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
-	fmt.Println("Verifying Inner Product Argument")
+	 fmt.Println("Verifying Inner Product Argument")
 	 fmt.Printf("Commitment Value: %s \n", P)
 	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
 	 chal1 := new(big.Int).SetBytes(s1[:])
@@ -331,7 +333,7 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 		 // prover sends L & R and gets a challenge
 		 s256 := sha256.Sum256([]byte(
 			 Lval.X.String() + Lval.Y.String() +
-				 Rval.X.String() + Rval.Y.String()))
+			 Rval.X.String() + Rval.Y.String()))
 
 		 chal2 := new(big.Int).SetBytes(s256[:])
 
@@ -345,9 +347,14 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 	 	curIt -= 1
 	 }
 
-	ccalc := new(big.Int).Mul(ipp.a, ipp.b)
+	ccalc := new(big.Int).Mod(new(big.Int).Mul(ipp.a, ipp.b), CP.N)
 
-	Pcalc := Gprime[0].Mult(ipp.a).Add(Hprime[0].Mult(ipp.b)).Add(CP.U.Mult(new(big.Int).Mul(chal1, ccalc)))
+	Pcalc1 := Gprime[0].Mult(ipp.a)
+	Pcalc2 := Pcalc1.Add(Hprime[0].Mult(ipp.b))
+	Pcalc3 := CP.U.Mult(new(big.Int).Mul(chal1, ccalc))
+	Pcalc := Pcalc2.Add(Pcalc3)
+
+
 	fmt.Printf("Final Pprime value: %s \n", Pprime)
 	fmt.Printf("Calculated Pprime value to check against: %s \n", Pcalc)
 
@@ -406,8 +413,8 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 	gen2Vals := make([]ECPoint, n)
 	u := ECPoint{big.NewInt(0), big.NewInt(0)}
 
-	j := 0;
-	confirmed := 0;
+	j := 0
+	confirmed := 0
 	for confirmed < (2*n + 1) {
 		s256.Write(new(big.Int).Add(curValue, big.NewInt(int64(j))).Bytes())
 
@@ -431,9 +438,9 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 					//println("new H value")
 				}
 			}
-			confirmed += 1;
+			confirmed += 1
 		}
-		j += 1;
+		j += 1
 	}
 
 	return CryptoParams{
