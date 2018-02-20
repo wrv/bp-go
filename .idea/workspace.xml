@@ -20,11 +20,9 @@
       <file leaf-file-name="crypto.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/crypto.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="292" column="0" lean-forward="true" selection-start-line="292" selection-start-column="0" selection-end-line="292" selection-end-column="0" />
-              <folding>
-                <element signature="e#13#166#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="345">
+              <caret line="352" column="67" lean-forward="true" selection-start-line="352" selection-start-column="67" selection-end-line="352" selection-end-column="67" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -42,8 +40,8 @@
       <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="69" column="24" lean-forward="true" selection-start-line="69" selection-start-column="24" selection-end-line="69" selection-end-column="24" />
+            <state relative-caret-position="-266">
+              <caret line="44" column="0" lean-forward="true" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
               <folding>
                 <element signature="e#12#52#0" expanded="true" />
               </folding>
@@ -64,8 +62,8 @@
     <findStrings>
       <find>CP.</find>
       <find>fmt.Println</find>
-      <find>fmt.Printf</find>
       <find>veclength</find>
+      <find>fmt.Printf</find>
     </findStrings>
   </component>
   <component name="GOROOT" path="/usr/lib/go-1.6" />
@@ -89,10 +87,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="49" />
+    <option name="x" value="-426" />
     <option name="y" value="-3" />
-    <option name="width" value="1871" />
-    <option name="height" value="1203" />
+    <option name="width" value="1869" />
+    <option name="height" value="1083" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -109,7 +107,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
@@ -127,6 +124,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -148,7 +146,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.TestInnerProductProveLen4 in crypto_test.go">
+  <component name="RunManager" selected="Go Test.TestInnerProductProveLen8 in crypto_test.go">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -217,11 +215,11 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen4 in crypto_test.go" />
-        <item index="1" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen2 in crypto_test.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen1 in crypto_test.go" />
-        <item index="3" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
-        <item index="4" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen8 in crypto_test.go" />
+        <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen8 in crypto_test.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
+        <item index="2" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen4 in crypto_test.go" />
+        <item index="3" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen2 in crypto_test.go" />
+        <item index="4" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen1 in crypto_test.go" />
       </list>
     </recent_temporary>
   </component>
@@ -229,29 +227,14 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TestHistory">
-    <history-entry file="TestInnerProductProveLen1_in_crypto_test_go - 2018.02.18 at 22h 17m 44s.xml">
+    <history-entry file="TestInnerProductProveLen1_in_crypto_test_go - 2018.02.20 at 13h 24m 51s.xml">
       <configuration name="TestInnerProductProveLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestInnerProductProveLen2_in_crypto_test_go - 2018.02.18 at 22h 17m 54s.xml">
+    <history-entry file="TestInnerProductProveLen1_in_crypto_test_go - 2018.02.20 at 13h 25m 06s.xml">
+      <configuration name="TestInnerProductProveLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen2_in_crypto_test_go - 2018.02.20 at 13h 25m 10s.xml">
       <configuration name="TestInnerProductProveLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 17m 31s.xml">
-      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 18m 06s.xml">
-      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 19m 42s.xml">
-      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 19m 49s.xml">
-      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 37m 19s.xml">
-      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 22h 38m 35s.xml">
-      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
     <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 23h 02m 03s.xml">
       <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
@@ -259,9 +242,24 @@
     <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.18 at 23h 06m 00s.xml">
       <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.20 at 13h 25m 16s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen4_in_crypto_test_go - 2018.02.20 at 14h 36m 03s.xml">
+      <configuration name="TestInnerProductProveLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen8_in_crypto_test_go - 2018.02.20 at 14h 36m 31s.xml">
+      <configuration name="TestInnerProductProveLen8 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestInnerProductProveLen8_in_crypto_test_go - 2018.02.20 at 14h 37m 10s.xml">
+      <configuration name="TestInnerProductProveLen8 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.20 at 14h 36m 21s.xml">
+      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="49" y="-3" width="1873" height="1218" extended-state="6" />
+    <frame x="49" y="-3" width="1871" height="1203" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1838589" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -269,8 +267,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32925683" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32972974" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32977018" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.34054053" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -279,6 +276,7 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32977018" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -292,7 +290,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="3" />
+      <option name="time" value="5" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -301,9 +299,33 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="56">
+          <caret line="4" column="22" lean-forward="true" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="910">
+          <caret line="69" column="24" lean-forward="true" selection-start-line="69" selection-start-column="24" selection-end-line="69" selection-end-column="24" />
           <folding>
-            <element signature="e#13#166#0" expanded="true" />
+            <element signature="e#12#52#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/crypto.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -329,9 +351,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#13#166#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -357,9 +377,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
           <caret line="14" column="19" lean-forward="false" selection-start-line="14" selection-start-column="19" selection-end-line="14" selection-end-column="19" />
-          <folding>
-            <element signature="e#13#166#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -385,9 +403,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#13#166#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -405,9 +421,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#13#166#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -460,8 +474,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="69" column="24" lean-forward="true" selection-start-line="69" selection-start-column="24" selection-end-line="69" selection-end-column="24" />
+        <state relative-caret-position="-266">
+          <caret line="44" column="0" lean-forward="true" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
           <folding>
             <element signature="e#12#52#0" expanded="true" />
           </folding>
@@ -470,11 +484,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="292" column="0" lean-forward="true" selection-start-line="292" selection-start-column="0" selection-end-line="292" selection-end-column="0" />
-          <folding>
-            <element signature="e#13#166#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="345">
+          <caret line="352" column="67" lean-forward="true" selection-start-line="352" selection-start-column="67" selection-end-line="352" selection-end-column="67" />
+          <folding />
         </state>
       </provider>
     </entry>

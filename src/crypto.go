@@ -159,7 +159,7 @@ func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 		c = new(big.Int).Add(c, new(big.Int).Mul(a[i], b[i]))
 	}
 
-	return new(big.Int).Mod(c, CP.C.Params().P)
+	return new(big.Int).Mod(c, CP.N)
 }
 
 func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
@@ -230,10 +230,10 @@ This is a building block for BulletProofs
 
 */
 func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint, P ECPoint) InnerProdArg {
-	fmt.Printf("Proof so far: %s\n", proof)
+	//fmt.Printf("Proof so far: %s\n", proof)
 	if len(a) == 1{
 		// Prover sends a & b
-		fmt.Printf("a: %d && b: %d\n", a[0], b[0])
+		//fmt.Printf("a: %d && b: %d\n", a[0], b[0])
 		proof.a = a[0]
 		proof.b = b[0]
 		return proof
@@ -244,8 +244,8 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 	nprime := len(a)/2
 	//println(nprime)
 	//println(len(H))
-	cl := InnerProduct(a[:nprime], b[nprime:])
-	cr := InnerProduct(a[nprime:], b[:nprime])
+	cl := InnerProduct(a[:nprime], b[nprime:]) // either this line
+	cr := InnerProduct(a[nprime:], b[:nprime]) // or this line
 	L := TwoVectorPCommitWithGens(G[nprime:], H[:nprime], a[:nprime], b[nprime:]).Add(u.Mult(cl))
 	R := TwoVectorPCommitWithGens(G[:nprime], H[nprime:], a[nprime:], b[:nprime]).Add(u.Mult(cr))
 
@@ -264,6 +264,8 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 	Gprime, Hprime, Pprime := GenerateNewParams(G, H, x, L, R, P)
 	//fmt.Printf("Prover - Intermediate Pprime value: %s \n", Pprime)
 	xinv := new(big.Int).ModInverse(x, CP.N)
+
+	// or these two lines
 	aprime := VectorAdd(
 		ScalarVectorMul(a[:nprime], x),
 		ScalarVectorMul(a[nprime:], xinv))
@@ -311,7 +313,7 @@ ipp : the proof
  */
 func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 	 fmt.Println("Verifying Inner Product Argument")
-	 fmt.Printf("Commitment Value: %s \n", P)
+	 //fmt.Printf("Commitment Value: %s \n", P)
 	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
 	 chal1 := new(big.Int).SetBytes(s1[:])
 	 ux := CP.U.Mult(chal1)
@@ -327,7 +329,7 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 	 Gprime := CP.G
 	 Hprime := CP.H
 	 Pprime := P.Add(ux.Mult(c)) // line 6 from protocol 1
-	 fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
+	 //fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
 
 	 for curIt >= 0 {
 	 	Lval := ipp.L[curIt]
@@ -356,8 +358,8 @@ func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
 	Pcalc := Pcalc1.Add(Pcalc2).Add(Pcalc3)
 
 
-	fmt.Printf("Final Pprime value: %s \n", Pprime)
-	fmt.Printf("Calculated Pprime value to check against: %s \n", Pcalc)
+	//fmt.Printf("Final Pprime value: %s \n", Pprime)
+	//fmt.Printf("Calculated Pprime value to check against: %s \n", Pcalc)
 
 	if !Pprime.Equal(Pcalc) {
 		println("IPVerify - Final Commitment checking failed")
