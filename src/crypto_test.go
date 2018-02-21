@@ -121,11 +121,32 @@ func TestInnerProductProveLen8(t *testing.T) {
 	}
 }
 
+func TestValueBreakdown(t *testing.T){
+	v := big.NewInt(20)
+	yes := StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64))
+	vec2 := PowerVector(64, 2)
+
+	calc := InnerProduct(yes, vec2)
+
+	if v.Cmp(calc) != 0 {
+		println("Binary Value Breakdown - Failure :(")
+		fmt.Println(yes)
+		fmt.Println(vec2)
+		fmt.Println(calc)
+	} else {
+		println("Binary Value Breakdown - Success!")
+		//fmt.Println(yes)
+		//fmt.Println(vec2)
+		//fmt.Println(calc)
+	}
+
+}
+
 func TestRPVerify(t *testing.T) {
 	if RPVerify(RPProve(big.NewInt(3))) {
-		fmt.Println("Range Proof Verification works")
+		println("Range Proof Verification works")
 	} else {
-		fmt.Println("Range Proof failure")
+		println("*****Range Proof FAILURE")
 	}
 }
 

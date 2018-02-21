@@ -62,6 +62,8 @@ type CryptoParams struct{
 	N *big.Int				// scalar prime
 	U ECPoint				// a point that is a fixed group element with an unknown discrete-log relative to g,h
 	V int				// Vector length
+	CG ECPoint			// G value for commitments of a single value
+	CH ECPoint			// H value for commitments of a single value
 }
 
 func (c CryptoParams) Zero() ECPoint {
@@ -171,6 +173,17 @@ func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
 
 	return result
 }
+
+func VectorAddScalar(v []*big.Int, s *big.Int) []*big.Int {
+	result := make([]*big.Int, len(v))
+
+	for i := range v {
+		result[i] = new(big.Int).Mod(new(big.Int).Add(v[i], s), CP.N)
+	}
+
+	return result
+}
+
 
 func ScalarVectorMul(v []*big.Int, s *big.Int) []*big.Int {
 	result := make([]*big.Int, len(v))
@@ -312,7 +325,7 @@ ipp : the proof
 
  */
 func InnerProductVerify(c *big.Int, P ECPoint, ipp InnerProdArg) bool{
-	 fmt.Println("Verifying Inner Product Argument")
+	 //fmt.Println("Verifying Inner Product Argument")
 	 //fmt.Printf("Commitment Value: %s \n", P)
 	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
 	 chal1 := new(big.Int).SetBytes(s1[:])
@@ -380,37 +393,197 @@ func PadLeft(str, pad string, l int) string {
 	return strCopy
 }
 
+func STRNot(str string) string {
+	result := ""
+	for _,i := range str{
+		if i == '0' {
+			result += "1"
+		} else {
+			result += "0"
+		}
+	}
+
+	return result
+}
+
+func StrToBigIntArray(str string) []*big.Int {
+	result := make([]*big.Int, len(str))
+
+	for i := range str {
+		t, success := new(big.Int).SetString(string(str[i]), 10)
+		if success {
+			result[i] = t
+		}
+	}
+
+	return result
+}
+
+/*
+Delta is a helper function that is used in the range proof
+
+\delta(y, z) = (z-z^2)<1^n, y^n> - z^3<1^n, 2^n>
+ */
+
+func Delta(y []*big.Int, z *big.Int) *big.Int {
+	result := big.NewInt(0)
+
+	// (z-z^2)<1^n, y^n>
+	z2 := new(big.Int).Mod(new(big.Int).Mul(z, z), CP.N)
+	t1 := new(big.Int).Mod(new(big.Int).Sub(z, z2), CP.N)
+	t2 := new(big.Int).Mod(new(big.Int).Mul(t1, VectorSum(y)), CP.N)
+
+	// z^3<1^n, 2^n>
+	z3 := new(big.Int).Mod(new(big.Int).Mul(z2, z), CP.N)
+	t3 := new(big.Int).Mod(new(big.Int).Mul(z3, new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(len(y))), CP.N)), CP.N)
+
+	result = new(big.Int).Mod(new(big.Int).Sub(t2, t3), CP.N)
+
+	return result
+}
+
+func PowerVector(l, b int) []*big.Int {
+	result := make([]*big.Int, l)
+
+	for i := 0; i < l; i++{
+		result[i] = new(big.Int).Exp(big.NewInt(int64(b)), big.NewInt(int64(l - i - 1)), CP.N)
+	}
+
+	return result
+}
+
+func RandVector(l int) []*big.Int {
+	result := make([]*big.Int, l)
+
+
+	for i := 0; i < l; i++ {
+		x, err := rand.Int(rand.Reader, CP.N)
+		check(err)
+		result[i] = x
+	}
+
+	return result
+}
+
+func VectorSum(y []*big.Int) *big.Int{
+	result := big.NewInt(0)
+
+	for _,j := range y {
+		result.Add(result, j)
+	}
+
+	return result
+}
+
 type RangeProof struct {
+	Comm 	ECPoint
 	A		ECPoint
 	S 		ECPoint
 	T1 		ECPoint
 	T2		ECPoint
 	L 		[]ECPoint
 	R 		[]ECPoint
-	tau 	*big.Int
-	th 		*big.Int
-	mu 		*big.Int
-	a 		*big.Int
-	b 		*big.Int
+	Tau 	*big.Int
+	Th 		*big.Int
+	Mu 		*big.Int
+	Aa 		*big.Int
+	Bb 		*big.Int
 
 	// challenges
-	cy 		*big.Int
-	cz 		*big.Int
-	cx 		*big.Int
-	cxu 	*big.Int
-	cxi 	[]*big.Int
+	Cy 		*big.Int
+	Cz 		*big.Int
+	Cx 		*big.Int
+	Cxu 	*big.Int
+	Cxi 	[]*big.Int
 }
 
 
+// Calculates (aL - z*1^n) + sL*x
+func CalculateL(aL, sL []*big.Int, z, x *big.Int, l int) []*big.Int {
+	result := make([]*big.Int, l)
+
+	tmp1 := VectorAddScalar(aL, new(big.Int).Neg(z))
+	tmp2 := ScalarVectorMul(sL, x)
+
+	result = VectorAdd(tmp1, tmp2)
+
+	return result
+}
+
+
+
+
+/*
+RPProver : Range Proof Prove
+
+Given a value v, provides a range proof that v is inside 0 to 2^64
+ */
 func RPProve(v *big.Int) RangeProof {
+
+	rpresult := RangeProof{}
+
+	if v.Cmp(big.NewInt(0)) == -1 {
+		panic("Value is below range! Not proving")
+	}
+
+	if v.Cmp(new(big.Int).Exp(big.NewInt(2), big.NewInt(64), CP.N)) == 1 {
+		panic("Value is above range! Not proving.")
+	}
+
+	gamma, err := rand.Int(rand.Reader, CP.N)
+	check(err)
+	comm := CP.CG.Mult(v).Add(CP.CH.Mult(gamma))
+	rpresult.Comm = comm
 
 	// break up v into its bitwise representation
 	//aL := 0
-	//aL := PadLeft(fmt.Sprintf("%b", v), "0", 64)
+	straL := PadLeft(fmt.Sprintf("%b", v), "0", 64)
+	straR := STRNot(straL)
+
+	aL := StrToBigIntArray(straL)
+	aR := StrToBigIntArray(straR)
 
 
+	alpha, err := rand.Int(rand.Reader, CP.N)
+	check(err)
 
-	return RangeProof{}
+	A := TwoVectorPCommitWithGens(CP.G, CP.H, aL, aR).Add(CP.CH.Mult(alpha))
+
+	sL := RandVector(64)
+	sR := RandVector(64)
+
+	rho, err := rand.Int(rand.Reader, CP.N)
+	check(err)
+
+	S := TwoVectorPCommitWithGens(CP.G, CP.H, sL, sR).Add(CP.CH.Mult(rho))
+
+	chal1s256 := sha256.Sum256([]byte(A.X.String() + A.Y.String()))
+	cy := new(big.Int).SetBytes(chal1s256[:])
+
+	rpresult.Cy = cy
+
+	chal2s256 := sha256.Sum256([]byte(S.X.String() + S.Y.String()))
+	cz := new(big.Int).SetBytes(chal2s256[:])
+
+	rpresult.Cz = cz
+	// need to generate l(X), r(X), and t(X)=<l(X),r(X)>
+
+	t1 := big.NewInt(0)
+	t2 := big.NewInt(0)
+
+	// given the t_i values, we can generate commitments to them
+	tau1, err := rand.Int(rand.Reader, CP.N)
+	check(err)
+	tau2, err := rand.Int(rand.Reader, CP.N)
+	check(err)
+
+	T1 := CP.CG.Mult(t1).Add(CP.CH.Mult(tau1)) //commitment to t1
+	T2 := CP.CG.Mult(t2).Add(CP.CH.Mult(tau2)) //commitment to t2
+
+	rpresult.T1 = T1
+	rpresult.T2 = T2
+
+	return rpresult
 }
 
 func RPVerify(rp RangeProof) bool {
@@ -428,10 +601,13 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 	gen1Vals := make([]ECPoint, n)
 	gen2Vals := make([]ECPoint, n)
 	u := ECPoint{big.NewInt(0), big.NewInt(0)}
+	cg := ECPoint{}
+	ch := ECPoint{}
+
 
 	j := 0
 	confirmed := 0
-	for confirmed < (2*n + 1) {
+	for confirmed < (2*n + 3) {
 		s256.Write(new(big.Int).Add(curValue, big.NewInt(int64(j))).Bytes())
 
 		potentialXValue := make([]byte, 33)
@@ -445,6 +621,11 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 			if confirmed == 2*n{ // once we've generated all g and h values then assign this to u
 				u = ECPoint{gen2.X, gen2.Y}
 				//println("Got that U value")
+			} else if confirmed == 2*n +1 {
+				cg = ECPoint{gen2.X, gen2.Y}
+
+			} else if confirmed == 2*n + 2 {
+				ch = ECPoint{gen2.X, gen2.Y}
 			} else {
 				if confirmed%2 == 0 {
 					gen1Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
@@ -466,7 +647,9 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 		gen2Vals,
 		btcec.S256().N,
 		u,
-		n}
+		n,
+		cg,
+		ch}
 }
 
 
