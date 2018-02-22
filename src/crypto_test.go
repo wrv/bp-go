@@ -124,7 +124,7 @@ func TestInnerProductProveLen8(t *testing.T) {
 func TestValueBreakdown(t *testing.T){
 	v := big.NewInt(20)
 	yes := StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64))
-	vec2 := PowerVector(64, 2)
+	vec2 := PowerVector(64, big.NewInt(2))
 
 	calc := InnerProduct(yes, vec2)
 

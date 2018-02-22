@@ -174,6 +174,16 @@ func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
 	return result
 }
 
+func VectorHadamard(v, w []*big.Int) []*big.Int {
+	result := make([]*big.Int, len(v))
+
+	for i := range v {
+		result[i] = new(big.Int).Mod(new(big.Int).Mul(v[i], w[i]), CP.N)
+	}
+
+	return result
+}
+
 func VectorAddScalar(v []*big.Int, s *big.Int) []*big.Int {
 	result := make([]*big.Int, len(v))
 
@@ -442,11 +452,11 @@ func Delta(y []*big.Int, z *big.Int) *big.Int {
 	return result
 }
 
-func PowerVector(l, b int) []*big.Int {
+func PowerVector(l int, b *big.Int) []*big.Int {
 	result := make([]*big.Int, l)
 
 	for i := 0; i < l; i++{
-		result[i] = new(big.Int).Exp(big.NewInt(int64(b)), big.NewInt(int64(l - i - 1)), CP.N)
+		result[i] = new(big.Int).Exp(b, big.NewInt(int64(l - i - 1)), CP.N)
 	}
 
 	return result
@@ -481,11 +491,13 @@ type RangeProof struct {
 	S 		ECPoint
 	T1 		ECPoint
 	T2		ECPoint
-	L 		[]ECPoint
-	R 		[]ECPoint
 	Tau 	*big.Int
 	Th 		*big.Int
 	Mu 		*big.Int
+
+	// Innerproduct components
+	L 		[]ECPoint
+	R 		[]ECPoint
 	Aa 		*big.Int
 	Bb 		*big.Int
 
@@ -493,14 +505,16 @@ type RangeProof struct {
 	Cy 		*big.Int
 	Cz 		*big.Int
 	Cx 		*big.Int
+
+	// Innerproduct challenges
 	Cxu 	*big.Int
 	Cxi 	[]*big.Int
 }
 
 
 // Calculates (aL - z*1^n) + sL*x
-func CalculateL(aL, sL []*big.Int, z, x *big.Int, l int) []*big.Int {
-	result := make([]*big.Int, l)
+func CalculateL(aL, sL []*big.Int, z, x *big.Int) []*big.Int {
+	result := make([]*big.Int, len(aL))
 
 	tmp1 := VectorAddScalar(aL, new(big.Int).Neg(z))
 	tmp2 := ScalarVectorMul(sL, x)
@@ -510,7 +524,16 @@ func CalculateL(aL, sL []*big.Int, z, x *big.Int, l int) []*big.Int {
 	return result
 }
 
+func CalculateR(aR, sR, y, po2 []*big.Int, z, x *big.Int) []*big.Int {
+	result := make([]*big.Int, len(aR))
 
+	tmp1 := VectorHadamard(y, VectorAdd(VectorAddScalar(aR, z),ScalarVectorMul(sR, x)))
+	tmp2 := ScalarVectorMul(po2, new(big.Int).Mod(new(big.Int).Mul(z, z), CP.N))
+
+	result = VectorAdd(tmp1, tmp2)
+
+	return result
+}
 
 
 /*
@@ -521,6 +544,8 @@ Given a value v, provides a range proof that v is inside 0 to 2^64
 func RPProve(v *big.Int) RangeProof {
 
 	rpresult := RangeProof{}
+
+	PowerOfTwos := PowerVector(64, big.NewInt(2))
 
 	if v.Cmp(big.NewInt(0)) == -1 {
 		panic("Value is below range! Not proving")
@@ -548,6 +573,7 @@ func RPProve(v *big.Int) RangeProof {
 	check(err)
 
 	A := TwoVectorPCommitWithGens(CP.G, CP.H, aL, aR).Add(CP.CH.Mult(alpha))
+	rpresult.A = A
 
 	sL := RandVector(64)
 	sR := RandVector(64)
@@ -556,6 +582,7 @@ func RPProve(v *big.Int) RangeProof {
 	check(err)
 
 	S := TwoVectorPCommitWithGens(CP.G, CP.H, sL, sR).Add(CP.CH.Mult(rho))
+	rpresult.S = S
 
 	chal1s256 := sha256.Sum256([]byte(A.X.String() + A.Y.String()))
 	cy := new(big.Int).SetBytes(chal1s256[:])
@@ -568,8 +595,36 @@ func RPProve(v *big.Int) RangeProof {
 	rpresult.Cz = cz
 	// need to generate l(X), r(X), and t(X)=<l(X),r(X)>
 
-	t1 := big.NewInt(0)
-	t2 := big.NewInt(0)
+	/*
+		FieldVector ys = FieldVector.from(VectorX.iterate(n, BigInteger.ONE, y::multiply),q);
+	    FieldVector l0 = aL.add(z.negate());
+        FieldVector l1 = sL;
+        FieldVector twoTimesZSquared = twos.times(zSquared);
+        FieldVector r0 = ys.hadamard(aR.add(z)).add(twoTimesZSquared);
+        FieldVector r1 = sR.hadamard(ys);
+        BigInteger k = ys.sum().multiply(z.subtract(zSquared)).subtract(zCubed.shiftLeft(n).subtract(zCubed));
+        BigInteger t0 = k.add(zSquared.multiply(number));
+        BigInteger t1 = l1.innerPoduct(r0).add(l0.innerPoduct(r1));
+        BigInteger t2 = l1.innerPoduct(r1);
+   		PolyCommitment<T> polyCommitment = PolyCommitment.from(base, t0, VectorX.of(t1, t2));
+
+
+	 */
+	PowerOfCY := PowerVector(64, cy)
+	l0 := VectorAddScalar(aL, new(big.Int).Neg(cz))
+	l1 := sL
+	r0 := VectorAdd(
+		VectorHadamard(
+			PowerOfCY,
+			VectorAddScalar(aR, cz)),
+		ScalarVectorMul(
+			PowerOfTwos,
+			new(big.Int).Mod(new(big.Int).Mul(cz, cz), CP.N)))
+	r1 := VectorHadamard(sR, PowerOfCY)
+
+	// t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mod(new(big.Int).Mul(v, new(big.Int).Mul(cz, cz)), CP.N), Delta(PowerOfCY, cz)),CP.N)
+	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(l1, r0), InnerProduct(l0, r1)), CP.N)
+	t2 := InnerProduct(l1, r1)
 
 	// given the t_i values, we can generate commitments to them
 	tau1, err := rand.Int(rand.Reader, CP.N)
@@ -583,12 +638,36 @@ func RPProve(v *big.Int) RangeProof {
 	rpresult.T1 = T1
 	rpresult.T2 = T2
 
+
+	chal3s256 := sha256.Sum256([]byte(T1.X.String() + T1.Y.String() + T2.X.String() + T2.Y.String()))
+	cx := new(big.Int).SetBytes(chal3s256[:])
+
+	l := CalculateL(aL, sL, cz, cx)
+	r := CalculateR(aR, sR, PowerOfCY, PowerOfTwos, cz, cx)
+
+	that := InnerProduct(l, r)
+
+	rpresult.Th = that
+
+	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), CP.N)
+	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), CP.N)
+	taux3 := new(big.Int).Mod(new(big.Int).Mul(new(big.Int).Mul(cz, cz), gamma), CP.N)
+	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, taux3)), CP.N)
+
+	rpresult.Tau = taux
+
+	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), CP.N)
+
+	rpresult.Mu = mu
+
+	fmt.Println(rpresult)
+
 	return rpresult
 }
 
 func RPVerify(rp RangeProof) bool {
 	// verify the challenges
-
+	
 
 	return false
 }
