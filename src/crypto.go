@@ -494,10 +494,10 @@ type RangeProof struct {
 	Tau 	*big.Int
 	Th 		*big.Int
 	Mu 		*big.Int
+	L 		[]*big.Int
+	R 		[]*big.Int
 
 	// Innerproduct components
-	L 		[]ECPoint
-	R 		[]ECPoint
 	Aa 		*big.Int
 	Bb 		*big.Int
 
@@ -642,8 +642,13 @@ func RPProve(v *big.Int) RangeProof {
 	chal3s256 := sha256.Sum256([]byte(T1.X.String() + T1.Y.String() + T2.X.String() + T2.Y.String()))
 	cx := new(big.Int).SetBytes(chal3s256[:])
 
+	rpresult.Cx = cx
+
 	l := CalculateL(aL, sL, cz, cx)
 	r := CalculateR(aR, sR, PowerOfCY, PowerOfTwos, cz, cx)
+
+	rpresult.L = l
+	rpresult.R = r
 
 	that := InnerProduct(l, r)
 
@@ -667,9 +672,81 @@ func RPProve(v *big.Int) RangeProof {
 
 func RPVerify(rp RangeProof) bool {
 	// verify the challenges
-	
+	chal1s256 := sha256.Sum256([]byte(rp.A.X.String() + rp.A.Y.String()))
+	cy := new(big.Int).SetBytes(chal1s256[:])
+	if cy.Cmp(rp.Cy) != 0 {
+		fmt.Println("RPVerify - Challenge Cy failing!")
+		return false
+	}
 
-	return false
+	chal2s256 := sha256.Sum256([]byte(rp.S.X.String() + rp.S.Y.String()))
+	cz := new(big.Int).SetBytes(chal2s256[:])
+
+	if cz.Cmp(rp.Cz) != 0 {
+		fmt.Println("RPVerify - Challenge Cz failing!")
+		return false
+	}
+
+	chal3s256 := sha256.Sum256([]byte(rp.T1.X.String() + rp.T1.Y.String() + rp.T2.X.String() + rp.T2.Y.String()))
+	cx := new(big.Int).SetBytes(chal3s256[:])
+
+	if cx.Cmp(rp.Cx) != 0 {
+		fmt.Println("RPVerify - Challenge Cx failing!")
+		return false
+	}
+
+	// generate h'
+
+	PowersOfY := PowerVector(64, cy)
+
+	HPrime := make([]ECPoint, len(CP.H))
+
+	for i := range HPrime {
+		if i == 0 {
+			HPrime[i] = CP.H[i]
+		}
+		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowersOfY[len(PowersOfY)-1-i], CP.N))
+	}
+	// t_hat * G + tau * H
+	lhs := CP.CG.Mult(rp.Th).Add(CP.CH.Mult(rp.Tau))
+	// z^2 * V + delta(y,z) * G + x * T1 + x^2 * T2
+	rhs := rp.Comm.Mult(new(big.Int).Mul(cz, cz)).Add(CP.CG.Mult(Delta(PowersOfY, cz))).Add(rp.T1.Mult(cx)).Add(rp.T2.Mult(new(big.Int).Mul(cx, cx)))
+
+	if !lhs.Equal(rhs){
+		fmt.Println("RPVerify - Uh oh! Check line (63) of verification")
+		return false
+	}
+
+	tmp1 := CP.Zero()
+	zinv := new(big.Int).ModInverse(cz, CP.N)
+	for i := range CP.G {
+		tmp1 = tmp1.Add(CP.G[i].Mult(zinv))
+	}
+
+	PowerOfTwos := PowerVector(64, big.NewInt(2))
+	tmp2 := CP.Zero()
+
+	for i := range HPrime {
+		val1 := new(big.Int).Mul(cz, PowersOfY[len(PowersOfY)-i-1])
+		val2 := new(big.Int).Mul(new(big.Int).Mul(cz, cz), PowerOfTwos[len(PowerOfTwos)-i-1])
+		tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
+	}
+
+	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2)
+
+	rhs2 := TwoVectorPCommitWithGens(CP.G, HPrime, rp.L, rp.R).Add(CP.CH.Mult(rp.Mu))
+
+	if !P.Equal(rhs2) {
+		fmt.Println("RPVerify - Uh oh! Check line (65) of verification!")
+		return false
+	}
+
+	if rp.Th.Cmp(InnerProduct(rp.L, rp.R)) != 0 {
+		fmt.Println("RPVerify - Uh oh! Check line (66) of verification!")
+		return true
+	}
+
+	return true
 }
 
 // NewECPrimeGroupKey returns the curve (field),
