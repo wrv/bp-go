@@ -653,7 +653,10 @@ func RPProve(v *big.Int) RangeProof {
 			new(big.Int).Mul(cz, cz)))
 	r1 := VectorHadamard(sR, PowerOfCY)
 
-	// t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mod(new(big.Int).Mul(v, new(big.Int).Mul(cz, cz)), CP.N), Delta(PowerOfCY, cz)),CP.N)
+	//calculate t0
+	z2 := new(big.Int).Exp(cz, big.NewInt(2), CP.N)
+	t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mul(v, z2), Delta(PowerOfCY, cz)),CP.N)
+
 	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(l1, r0), InnerProduct(l0, r1)), CP.N)
 	t2 := InnerProduct(l1, r1)
 
@@ -678,7 +681,16 @@ func RPProve(v *big.Int) RangeProof {
 	l := CalculateL(aL, sL, cz, cx)
 	r := CalculateR(aR, sR, PowerOfCY, PowerOfTwos, cz, cx)
 
-	that := InnerProduct(l, r)
+	thatPrime := new(big.Int).Mod(new(big.Int).Add(t0, new(big.Int).Add(new(big.Int).Mul(t1, cx), new(big.Int).Mul(new(big.Int).Mul(cx,cx), t2))), CP.N)
+
+	that := InnerProduct(l, r) // NOTE: BP Java implementation calculates this from the t_i
+
+	// thatPrime and that should be equal
+	if thatPrime.Cmp(that) != 0 {
+		fmt.Println("Proving -- Uh oh! Two diff ways to compute same value not working")
+		fmt.Printf("\tthatPrime = %s\n", thatPrime.String())
+		fmt.Printf("\tthat = %s \n", that.String())
+	}
 
 	HPrime := make([]ECPoint, len(CP.H))
 
@@ -686,9 +698,9 @@ func RPProve(v *big.Int) RangeProof {
 		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
 	}
 
-	rpresult.IPP = InnerProductProve(l, r, that, TwoVectorPCommit(l, r), CP.G, HPrime)
+	rpresult.IPP = InnerProductProve(l, r, thatPrime, TwoVectorPCommitWithGens(CP.G, HPrime, l, r), CP.G, HPrime)
 
-	rpresult.Th = that
+	rpresult.Th = thatPrime
 
 	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), CP.N)
 	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), CP.N)
