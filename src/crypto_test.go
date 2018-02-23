@@ -4,6 +4,7 @@ import (
 	"testing"
 	"math/big"
 	"fmt"
+	"crypto/rand"
 )
 
 func TestInnerProductProveLen1(t *testing.T) {
@@ -121,6 +122,27 @@ func TestInnerProductProveLen8(t *testing.T) {
 	}
 }
 
+func TestInnerProductProveLen64Rand(t *testing.T) {
+	println("TestInnerProductProveLen64Rand")
+	CP = NewECPrimeGroupKey(64)
+	a := RandVector(64)
+	b := RandVector(64)
+
+	c := InnerProduct(a, b)
+
+	P := TwoVectorPCommit(a, b)
+
+	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
+
+	if InnerProductVerify(c, P, ipp){
+		println("Inner Product Proof correct")
+	} else {
+		println("Inner Product Proof incorrect")
+		fmt.Printf("Values Used: \n\ta = %s\n\tb = %s\n", a, b)
+	}
+
+}
+
 func TestValueBreakdown(t *testing.T){
 	v := big.NewInt(20)
 	yes := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64)))
@@ -139,22 +161,32 @@ func TestValueBreakdown(t *testing.T){
 		//fmt.Println(vec2)
 		//fmt.Println(calc)
 	}
-
 }
 
-func TestRPVerify(t *testing.T) {
-	CP = NewECPrimeGroupKey(64)
+func TestValueBreakdownRand(t *testing.T){
+	v, err := rand.Int(rand.Reader, new(big.Int).Exp(big.NewInt(2), big.NewInt(64), CP.N))
+	check(err)
 
-	if RPVerify(RPProve(big.NewInt(3))) {
-		println("Range Proof Verification works")
+	yes := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64)))
+	vec2 := PowerVector(64, big.NewInt(2))
+
+	calc := InnerProduct(yes, vec2)
+
+	if v.Cmp(calc) != 0 {
+		println("Binary Value Breakdown - Failure :(")
+		fmt.Println(yes)
+		fmt.Println(vec2)
+		fmt.Println(calc)
 	} else {
-		println("*****Range Proof FAILURE")
+		println("Binary Value Breakdown - Success!")
 	}
+
 }
+
 
 func TestRPVerify1(t *testing.T) {
 	CP = NewECPrimeGroupKey(64)
-
+	// Testing smallest number in range
 	if RPVerify(RPProve(big.NewInt(0))) {
 		println("Range Proof Verification works")
 	} else {
@@ -164,11 +196,38 @@ func TestRPVerify1(t *testing.T) {
 
 func TestRPVerify2(t *testing.T) {
 	CP = NewECPrimeGroupKey(64)
-
-	if RPVerify(RPProve(big.NewInt(500))) {
+	// Testing largest number in range
+	if RPVerify(RPProve(new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(63), CP.N), big.NewInt(1)))) {
 		println("Range Proof Verification works")
 	} else {
 		println("*****Range Proof FAILURE")
+	}
+}
+
+
+func TestRPVerify3(t *testing.T) {
+	CP = NewECPrimeGroupKey(64)
+	// Testing the value 3
+	if RPVerify(RPProve(big.NewInt(3))) {
+		println("Range Proof Verification works")
+	} else {
+		println("*****Range Proof FAILURE")
+	}
+}
+
+
+func TestRPVerifyRand(t *testing.T) {
+	CP = NewECPrimeGroupKey(64)
+
+	ran, err := rand.Int(rand.Reader, new(big.Int).Exp(big.NewInt(2), big.NewInt(64), CP.N))
+	check(err)
+
+	// Testing the value 3
+	if RPVerify(RPProve(ran)) {
+		println("Range Proof Verification works")
+	} else {
+		println("*****Range Proof FAILURE")
+		fmt.Printf("Random Value: %s", ran.String())
 	}
 }
 

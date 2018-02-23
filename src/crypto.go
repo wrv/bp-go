@@ -50,7 +50,7 @@ func (p ECPoint) Add(p2 ECPoint) ECPoint {
 // Neg returns the additive inverse of point p
 func (p ECPoint) Neg() ECPoint {
 	negY := new(big.Int).Neg(p.Y)
-	modValue := negY.Mod(negY, CP.C.Params().P)
+	modValue := negY.Mod(negY, CP.C.Params().P) // mod P is fine here because we're describing a curve point
 	return ECPoint{p.X, modValue}
 }
 
@@ -122,14 +122,7 @@ func TwoVectorPCommit(a []*big.Int, b []*big.Int) (ECPoint) {
 	commitment := CP.Zero()
 
 	for i := 0; i < CP.V; i++{
-		modA := new(big.Int).Mod(a[i], CP.N)
-		modB := new(big.Int).Mod(b[i], CP.N)
-
-		// aG, bH
-		lhsX, lhsY := CP.C.ScalarMult(CP.G[i].X, CP.G[i].Y, modA.Bytes())
-		rhsX, rhsY := CP.C.ScalarMult(CP.H[i].X, CP.H[i].Y, modB.Bytes())
-
-		commitment = commitment.Add(ECPoint{lhsX, lhsY}).Add(ECPoint{rhsX, rhsY})
+		commitment = commitment.Add(CP.G[i].Mult(a[i])).Add(CP.H[i].Mult(b[i]))
 	}
 
 	return commitment
@@ -606,7 +599,7 @@ func RPProve(v *big.Int) RangeProof {
 	alpha, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	A := TwoVectorPCommitWithGens(CP.G, CP.H, aL, aR).Add(CP.CH.Mult(alpha))
+	A := TwoVectorPCommit(aL, aR).Add(CP.CH.Mult(alpha))
 	rpresult.A = A
 
 	sL := RandVector(64)
@@ -615,7 +608,7 @@ func RPProve(v *big.Int) RangeProof {
 	rho, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	S := TwoVectorPCommitWithGens(CP.G, CP.H, sL, sR).Add(CP.CH.Mult(rho))
+	S := TwoVectorPCommit(sL, sR).Add(CP.CH.Mult(rho))
 	rpresult.S = S
 
 	chal1s256 := sha256.Sum256([]byte(A.X.String() + A.Y.String()))
@@ -630,7 +623,9 @@ func RPProve(v *big.Int) RangeProof {
 	// need to generate l(X), r(X), and t(X)=<l(X),r(X)>
 
 	/*
-		FieldVector ys = FieldVector.from(VectorX.iterate(n, BigInteger.ONE, y::multiply),q);
+	Java code on how to calculate t1 and t2
+
+		FieldVector ys = FieldVector.from(VectorX.iterate(n, BigInteger.ONE, y::multiply),q); //powers of y
 	    FieldVector l0 = aL.add(z.negate());
         FieldVector l1 = sL;
         FieldVector twoTimesZSquared = twos.times(zSquared);
@@ -646,6 +641,7 @@ func RPProve(v *big.Int) RangeProof {
 	 */
 	PowerOfCY := PowerVector(64, cy)
 	// fmt.Println(PowerOfCY)
+
 	l0 := VectorAddScalar(aL, new(big.Int).Neg(cz))
 	l1 := sL
 	r0 := VectorAdd(
@@ -654,7 +650,7 @@ func RPProve(v *big.Int) RangeProof {
 			VectorAddScalar(aR, cz)),
 		ScalarVectorMul(
 			PowerOfTwos,
-			new(big.Int).Mod(new(big.Int).Mul(cz, cz), CP.N)))
+			new(big.Int).Mul(cz, cz)))
 	r1 := VectorHadamard(sR, PowerOfCY)
 
 	// t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mod(new(big.Int).Mul(v, new(big.Int).Mul(cz, cz)), CP.N), Delta(PowerOfCY, cz)),CP.N)
@@ -718,32 +714,21 @@ func RPVerify(rp RangeProof) bool {
 		fmt.Println("RPVerify - Challenge Cy failing!")
 		return false
 	}
-
 	chal2s256 := sha256.Sum256([]byte(rp.S.X.String() + rp.S.Y.String()))
 	cz := new(big.Int).SetBytes(chal2s256[:])
-
 	if cz.Cmp(rp.Cz) != 0 {
 		fmt.Println("RPVerify - Challenge Cz failing!")
 		return false
 	}
-
 	chal3s256 := sha256.Sum256([]byte(rp.T1.X.String() + rp.T1.Y.String() + rp.T2.X.String() + rp.T2.Y.String()))
 	cx := new(big.Int).SetBytes(chal3s256[:])
-
 	if cx.Cmp(rp.Cx) != 0 {
 		fmt.Println("RPVerify - Challenge Cx failing!")
 		return false
 	}
 
-	// generate h'
-
+	// given challenges are correct, very range proof
 	PowersOfY := PowerVector(64, cy)
-
-	HPrime := make([]ECPoint, len(CP.H))
-
-	for i := range HPrime {
-		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowersOfY[i], CP.N))
-	}
 
 	// t_hat * G + tau * H
 	lhs := CP.CG.Mult(rp.Th).Add(CP.CH.Mult(rp.Tau))
@@ -769,6 +754,12 @@ func RPVerify(rp RangeProof) bool {
 
 	PowerOfTwos := PowerVector(64, big.NewInt(2))
 	tmp2 := CP.Zero()
+	// generate h'
+	HPrime := make([]ECPoint, len(CP.H))
+
+	for i := range HPrime {
+		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowersOfY[i], CP.N))
+	}
 
 	for i := range HPrime {
 		val1 := new(big.Int).Mul(cz, PowersOfY[i])
