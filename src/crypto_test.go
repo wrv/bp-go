@@ -20,7 +20,7 @@ func TestInnerProductProveLen1(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P)
+	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
 
 	if InnerProductVerify(c, P, ipp){
 		println("Inner Product Proof correct")
@@ -45,7 +45,7 @@ func TestInnerProductProveLen2(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P)
+	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
 
 	if InnerProductVerify(c, P, ipp){
 		println("Inner Product Proof correct")
@@ -75,7 +75,7 @@ func TestInnerProductProveLen4(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P)
+	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
 
 	if InnerProductVerify(c, P, ipp){
 		println("Inner Product Proof correct")
@@ -112,7 +112,7 @@ func TestInnerProductProveLen8(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P)
+	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
 
 	if InnerProductVerify(c, P, ipp){
 		println("Inner Product Proof correct")
@@ -123,7 +123,7 @@ func TestInnerProductProveLen8(t *testing.T) {
 
 func TestValueBreakdown(t *testing.T){
 	v := big.NewInt(20)
-	yes := StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64))
+	yes := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64)))
 	vec2 := PowerVector(64, big.NewInt(2))
 
 	calc := InnerProduct(yes, vec2)
@@ -143,7 +143,29 @@ func TestValueBreakdown(t *testing.T){
 }
 
 func TestRPVerify(t *testing.T) {
+	CP = NewECPrimeGroupKey(64)
+
 	if RPVerify(RPProve(big.NewInt(3))) {
+		println("Range Proof Verification works")
+	} else {
+		println("*****Range Proof FAILURE")
+	}
+}
+
+func TestRPVerify1(t *testing.T) {
+	CP = NewECPrimeGroupKey(64)
+
+	if RPVerify(RPProve(big.NewInt(0))) {
+		println("Range Proof Verification works")
+	} else {
+		println("*****Range Proof FAILURE")
+	}
+}
+
+func TestRPVerify2(t *testing.T) {
+	CP = NewECPrimeGroupKey(64)
+
+	if RPVerify(RPProve(big.NewInt(500))) {
 		println("Range Proof Verification works")
 	} else {
 		println("*****Range Proof FAILURE")
