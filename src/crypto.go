@@ -552,9 +552,14 @@ func CalculateL(aL, sL []*big.Int, z, x *big.Int) []*big.Int {
 
 func CalculateR(aR, sR, y, po2 []*big.Int, z, x *big.Int) []*big.Int {
 	result := make([]*big.Int, len(aR))
+	fmt.Println(y)
+	fmt.Println(po2)
 
-	tmp1 := VectorHadamard(y, VectorAdd(VectorAddScalar(aR, z),ScalarVectorMul(sR, x)))
-	tmp2 := ScalarVectorMul(po2, new(big.Int).Mod(new(big.Int).Mul(z, z), CP.N))
+	z2 := new(big.Int).Exp(z, big.NewInt(2), CP.N)
+	tmp11 := VectorAddScalar(aR, z)
+	tmp12 := ScalarVectorMul(sR, x)
+	tmp1 := VectorHadamard(y, VectorAdd(tmp11,tmp12))
+	tmp2 := ScalarVectorMul(po2, z2)
 
 	result = VectorAdd(tmp1, tmp2)
 
@@ -697,8 +702,9 @@ func RPProve(v *big.Int) RangeProof {
 	for i := range HPrime {
 		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
 	}
-
-	rpresult.IPP = InnerProductProve(l, r, thatPrime, TwoVectorPCommitWithGens(CP.G, HPrime, l, r), CP.G, HPrime)
+	P := TwoVectorPCommitWithGens(CP.G, HPrime, l, r)
+	fmt.Println(P)
+	rpresult.IPP = InnerProductProve(l, r, thatPrime, P, CP.G, HPrime)
 
 	rpresult.Th = thatPrime
 
@@ -780,6 +786,7 @@ func RPVerify(rp RangeProof) bool {
 	}
 
 	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2)
+	fmt.Println(P)
 
 	if !InnerProductVerify(rp.Th, P, rp.IPP) {
 		fmt.Println("RPVerify - Uh oh! Check line (65) of verification!")

@@ -183,6 +183,29 @@ func TestValueBreakdownRand(t *testing.T){
 
 }
 
+func TestVectorHadamard(t *testing.T) {
+	a := make([]*big.Int, 5)
+	a[0] = big.NewInt(1)
+	a[1] = big.NewInt(1)
+	a[2] = big.NewInt(1)
+	a[3] = big.NewInt(1)
+	a[4] = big.NewInt(1)
+
+	c := VectorHadamard(a, a)
+
+	success := true
+
+	for i := range c {
+		if c[i].Cmp(a[i]) != 0 {
+			success = false
+		}
+	}
+	if !success{
+		println("Failure in the Hadamard")
+	} else {
+		println("Hadamard good")
+	}
+}
 
 func TestRPVerify1(t *testing.T) {
 	CP = NewECPrimeGroupKey(64)
