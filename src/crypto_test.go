@@ -265,8 +265,27 @@ func TestMultiRPVerify1(t *testing.T) {
 	}
 }
 
+func TestMultiRPVerify2(t *testing.T) {
+	values := []*big.Int{big.NewInt(0)}
+	CP = NewECPrimeGroupKey(64 * len(values))
+	// Testing smallest number in range
+	if MRPVerify(MRPProve(values)) {
+		println("Multi Range Proof Verification works")
+	} else {
+		println("***** Multi Range Proof FAILURE")
+	}
+}
 
-
+func TestMultiRPVerify3(t *testing.T) {
+	values := []*big.Int{big.NewInt(0), big.NewInt(0)}
+	CP = NewECPrimeGroupKey(64 * len(values))
+	// Testing smallest number in range
+	if MRPVerify(MRPProve(values)) {
+		println("Multi Range Proof Verification works")
+	} else {
+		println("***** Multi Range Proof FAILURE")
+	}
+}
 
 func TestVectorPCommit3(t *testing.T) {
 	println("TestVectorPCommit3")

@@ -926,7 +926,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 
 	// we concatenate the binary representation of the values
 
-	PowerOfTwos := PowerVector(CP.V, big.NewInt(2))
+	PowerOfTwos := PowerVector(bitsPerValue, big.NewInt(2))
 
 	Comms := make([]ECPoint, m)
 	gammas := make([]*big.Int, m)
@@ -948,7 +948,6 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 		gammas[j] = gamma
 
 		// break up v into its bitwise representation
-		//aL := 0
 		aL := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", bitsPerValue)))
 		aR := VectorAddScalar(aL, big.NewInt(-1))
 
@@ -956,7 +955,6 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 			aLConcat[bitsPerValue*j+i] = aL[i]
 			aRConcat[bitsPerValue*j+i] = aR[i]
 		}
-
 	}
 
 	MRPResult.Comms = Comms
@@ -984,13 +982,16 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	cz := new(big.Int).SetBytes(chal2s256[:])
 	MRPResult.Cz = cz
 
-	zTimesTwo := make([]*big.Int, CP.V)
+	zPowersTimesTwoVec := make([]*big.Int, CP.V)
+
 	for j := 0; j < m; j++ {
 		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), CP.N)
 		for i := 0; i < bitsPerValue; i ++{
-			zTimesTwo[j*bitsPerValue+i] = new(big.Int).Mod(new(big.Int).Mul(PowerOfTwos[i], zp), CP.N)
+			zPowersTimesTwoVec[j*bitsPerValue+i] = new(big.Int).Mod(new(big.Int).Mul(PowerOfTwos[i], zp), CP.N)
 		}
 	}
+
+	//fmt.Println(zPowersTimesTwoVec)
 
 	// need to generate l(X), r(X), and t(X)=<l(X),r(X)>
 
@@ -1022,11 +1023,19 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 		VectorHadamard(
 			PowerOfCY,
 			VectorAddScalar(aRConcat, cz)),
-		zTimesTwo)
+		zPowersTimesTwoVec)
 	r1 := VectorHadamard(sR, PowerOfCY)
 
 	//calculate t0
-	//t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mul(v, z2), DeltaMRP(PowerOfCY, cz)),CP.N)
+	vz2 := big.NewInt(0)
+	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), CP.N)
+	PowerOfCZ := PowerVector(m, cz)
+	for j := 0; j < m; j++{
+		vz2 = new(big.Int).Add(vz2, new(big.Int).Mul(PowerOfCZ[j], new(big.Int).Mul(values[j], z2)))
+		vz2 = new(big.Int).Mod(vz2, CP.N)
+	}
+
+	t0 := new(big.Int).Mod(new(big.Int).Add(vz2, DeltaMRP(PowerOfCY, cz, m)),CP.N)
 
 	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(l1, r0), InnerProduct(l0, r1)), CP.N)
 	t2 := InnerProduct(l1, r1)
@@ -1049,20 +1058,20 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	MRPResult.Cx = cx
 
 	left := CalculateLMRP(aLConcat, sL, cz, cx)
-	right := CalculateRMRP(aRConcat, sR, PowerOfCY, zTimesTwo, cz, cx)
+	right := CalculateRMRP(aRConcat, sR, PowerOfCY, zPowersTimesTwoVec, cz, cx)
 
-	//thatPrime := new(big.Int).Mod( // t0 + t1*x + t2*x^2
-	//	new(big.Int).Add(t0, new(big.Int).Add(new(big.Int).Mul(t1, cx), new(big.Int).Mul(new(big.Int).Mul(cx,cx), t2))), CP.N)
+	thatPrime := new(big.Int).Mod( // t0 + t1*x + t2*x^2
+		new(big.Int).Add(t0, new(big.Int).Add(new(big.Int).Mul(t1, cx), new(big.Int).Mul(new(big.Int).Mul(cx,cx), t2))), CP.N)
 
 	that := InnerProduct(left, right) // NOTE: BP Java implementation calculates this from the t_i
 
 	// thatPrime and that should be equal
-	/*if thatPrime.Cmp(that) != 0 {
+	if thatPrime.Cmp(that) != 0 {
 		fmt.Println("Proving -- Uh oh! Two diff ways to compute same value not working")
 		fmt.Printf("\tthatPrime = %s\n", thatPrime.String())
 		fmt.Printf("\tthat = %s \n", that.String())
 	}
-	*/
+
 	MRPResult.Th = that
 
 	vecRandomnessTotal := big.NewInt(0)
@@ -1071,7 +1080,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 		tmp1 := new(big.Int).Mul(gammas[j], zp)
 		vecRandomnessTotal = new(big.Int).Mod(new(big.Int).Add(vecRandomnessTotal, tmp1) , CP.N)
 	}
-
+	fmt.Println(vecRandomnessTotal)
 	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), CP.N)
 	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), CP.N)
 	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, vecRandomnessTotal)), CP.N)
@@ -1080,7 +1089,6 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 
 	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), CP.N)
 	MRPResult.Mu = mu
-
 
 	HPrime := make([]ECPoint, len(CP.H))
 
@@ -1148,7 +1156,7 @@ func MRPVerify(mrp MultiRangeProof) bool {
 		mrp.T2.Mult(new(big.Int).Mul(cx, cx))).Add(CommPowers)
 
 	if !lhs.Equal(rhs){
-		fmt.Println("RPVerify - Uh oh! Check line (63) of verification")
+		fmt.Println("MRPVerify - Uh oh! Check line (63) of verification")
 		fmt.Println(rhs)
 		fmt.Println(lhs)
 		return false
@@ -1169,16 +1177,6 @@ func MRPVerify(mrp MultiRangeProof) bool {
 		mi := new(big.Int).ModInverse(PowersOfY[i], CP.N)
 		HPrime[i] = CP.H[i].Mult(mi)
 	}
-
-	/*
-	zTimesTwo := make([]*big.Int, CP.V)
-	for j := 0; j < m; j++ {
-		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), CP.N)
-		for i := 0; i < bitsPerValue; i++{
-			zTimesTwo[j*bitsPerValue+i] = new(big.Int).Mod(new(big.Int).Mul(PowerOfTwos[i], zp), CP.N)
-		}
-	}
-	 */
 
 	for j := 0; j < m; j++ {
 		for i := 0; i < bitsPerValue; i++ {
