@@ -170,7 +170,6 @@ func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 	c := big.NewInt(0)
 
 	for i := range a{
-		fmt.Println(c)
 		tmp1 := new(big.Int).Mul(a[i], b[i])
 		c = new(big.Int).Add(c, new(big.Int).Mod(tmp1, CP.N))
 	}
@@ -482,7 +481,8 @@ func Delta(y []*big.Int, z *big.Int) *big.Int {
 
 	// z^3<1^n, 2^n>
 	z3 := new(big.Int).Mod(new(big.Int).Mul(z2, z), CP.N)
-	t3 := new(big.Int).Mod(new(big.Int).Mul(z3, VectorSum(PowerVector(64, big.NewInt(2)))), CP.N)
+	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(64), CP.N), big.NewInt(1))
+	t3 := new(big.Int).Mod(new(big.Int).Mul(z3, po2sum), CP.N)
 
 	result = new(big.Int).Mod(new(big.Int).Sub(t2, t3), CP.N)
 
@@ -578,7 +578,7 @@ func CalculateR(aR, sR, y, po2 []*big.Int, z, x *big.Int) []*big.Int {
 /*
 RPProver : Range Proof Prove
 
-Given a value v, provides a range proof that v is inside 0 to 2^64
+Given a value v, provides a range proof that v is inside 0 to 2^64-1
  */
 func RPProve(v *big.Int) RangeProof {
 
@@ -602,12 +602,8 @@ func RPProve(v *big.Int) RangeProof {
 
 	// break up v into its bitwise representation
 	//aL := 0
-	straL := PadLeft(fmt.Sprintf("%b", v), "0", 64)
-	straR := STRNot(straL)
-
-	aL := reverse(StrToBigIntArray(straL))
-	aR := reverse(StrToBigIntArray(straR))
-
+	aL := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64)))
+	aR := VectorAddScalar(aL, big.NewInt(-1))
 
 	alpha, err := rand.Int(rand.Reader, CP.N)
 	check(err)
@@ -689,9 +685,8 @@ func RPProve(v *big.Int) RangeProof {
 
 	rpresult.Cx = cx
 
-	left := VectorAdd(l0, ScalarVectorMul(sL, cx)) //CalculateL(aL, sL, cz, cx)
-	right := VectorAdd(r0, ScalarVectorMul(r1, cx)) //CalculateR(aR, sR, PowerOfCY, PowerOfTwos, cz, cx)
-
+	left := CalculateL(aL, sL, cz, cx)
+	right := CalculateR(aR, sR, PowerOfCY, PowerOfTwos, cz, cx)
 
 	thatPrime := new(big.Int).Mod( // t0 + t1*x + t2*x^2
 		new(big.Int).Add(
@@ -712,30 +707,29 @@ func RPProve(v *big.Int) RangeProof {
 		fmt.Printf("\tthat = %s \n", that.String())
 	}
 
-
 	rpresult.Th = thatPrime
 
 	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), CP.N)
 	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), CP.N)
-	taux3 := new(big.Int).Mod(new(big.Int).Mul(new(big.Int).Mul(cz, cz), gamma), CP.N)
+	taux3 := new(big.Int).Mod(new(big.Int).Mul(z2, gamma), CP.N)
 	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, taux3)), CP.N)
 
 	rpresult.Tau = taux
 
 	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), CP.N)
-
 	rpresult.Mu = mu
 
+	
 	HPrime := make([]ECPoint, len(CP.H))
 
 	for i := range HPrime {
 		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
 	}
 	P := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
-	fmt.Println(P)
+	//fmt.Println(P)
 	rpresult.IPP = InnerProductProve(left, right, that, P, CP.CH, CP.G, HPrime)
 
-	fmt.Println(rpresult)
+	//fmt.Println(rpresult)
 
 	return rpresult
 }
