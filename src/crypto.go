@@ -359,7 +359,7 @@ P : the Pedersen commitment we are verifying is a commitment to the innner produ
 ipp : the proof
 
  */
-func InnerProductVerify(c *big.Int, P, U ECPoint, ipp InnerProdArg) bool{
+func InnerProductVerify(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdArg) bool{
 	 //fmt.Println("Verifying Inner Product Argument")
 	 //fmt.Printf("Commitment Value: %s \n", P)
 	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
@@ -374,8 +374,8 @@ func InnerProductVerify(c *big.Int, P, U ECPoint, ipp InnerProdArg) bool{
 
 	 curIt -= 1
 
-	 Gprime := CP.G
-	 Hprime := CP.H
+	 Gprime := G
+	 Hprime := H
 	 Pprime := P.Add(ux.Mult(c)) // line 6 from protocol 1
 	 //fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
 
@@ -405,12 +405,10 @@ func InnerProductVerify(c *big.Int, P, U ECPoint, ipp InnerProdArg) bool{
 	Pcalc3 := ux.Mult(ccalc)
 	Pcalc := Pcalc1.Add(Pcalc2).Add(Pcalc3)
 
-
-	//fmt.Printf("Final Pprime value: %s \n", Pprime)
-	//fmt.Printf("Calculated Pprime value to check against: %s \n", Pcalc)
-
 	if !Pprime.Equal(Pcalc) {
 		println("IPVerify - Final Commitment checking failed")
+		fmt.Printf("Final Pprime value: %s \n", Pprime)
+		fmt.Printf("Calculated Pprime value to check against: %s \n", Pcalc)
 		return false
 	}
 
@@ -719,17 +717,34 @@ func RPProve(v *big.Int) RangeProof {
 	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), CP.N)
 	rpresult.Mu = mu
 
-	
+
 	HPrime := make([]ECPoint, len(CP.H))
 
 	for i := range HPrime {
 		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
 	}
-	P := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
-	//fmt.Println(P)
-	rpresult.IPP = InnerProductProve(left, right, that, P, CP.CH, CP.G, HPrime)
 
-	//fmt.Println(rpresult)
+	// for testing
+	tmp1 := CP.Zero()
+	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), CP.N)
+	for i := range CP.G {
+		tmp1 = tmp1.Add(CP.G[i].Mult(zneg))
+	}
+
+	tmp2 := CP.Zero()
+	for i := range HPrime {
+		val1 := new(big.Int).Mul(cz, PowerOfCY[i])
+		val2 := new(big.Int).Mul(new(big.Int).Mul(cz, cz), PowerOfTwos[i])
+		tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
+	}
+
+	//P1 := A.Add(S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.U.Mult(that)).Add(CP.CH.Mult(mu).Neg())
+
+	P2 := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
+	//fmt.Println(P1)
+	fmt.Println(P2)
+
+	rpresult.IPP = InnerProductProve(left, right, that, P2, CP.CH, CP.G, HPrime)
 
 	return rpresult
 }
@@ -796,10 +811,10 @@ func RPVerify(rp RangeProof) bool {
 		tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
 	}
 
-	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2)
+	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.CH.Mult(rp.Mu).Neg()) //.Add(CP.U.Mult(rp.Th))
 	fmt.Println(P)
 
-	if !InnerProductVerify(rp.Th, P, CP.CH.Mult(rp.Mu), rp.IPP) {
+	if !InnerProductVerify(rp.Th, P, CP.CH, CP.G, HPrime, rp.IPP) {
 		fmt.Println("RPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}
