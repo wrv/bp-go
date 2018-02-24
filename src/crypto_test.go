@@ -21,9 +21,9 @@ func TestInnerProductProveLen1(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
 
-	if InnerProductVerify(c, P, ipp){
+	if InnerProductVerify(c, P, CP.U, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -46,9 +46,9 @@ func TestInnerProductProveLen2(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
 
-	if InnerProductVerify(c, P, ipp){
+	if InnerProductVerify(c, P,CP.U, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -76,9 +76,9 @@ func TestInnerProductProveLen4(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
 
-	if InnerProductVerify(c, P, ipp){
+	if InnerProductVerify(c, P,CP.U, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -113,9 +113,9 @@ func TestInnerProductProveLen8(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
 
-	if InnerProductVerify(c, P, ipp){
+	if InnerProductVerify(c, P,CP.U, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -132,9 +132,9 @@ func TestInnerProductProveLen64Rand(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
 
-	if InnerProductVerify(c, P, ipp){
+	if InnerProductVerify(c, P,CP.U, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
