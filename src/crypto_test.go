@@ -255,9 +255,10 @@ func TestRPVerifyRand(t *testing.T) {
 }
 
 func TestMultiRPVerify1(t *testing.T) {
-	CP = NewECPrimeGroupKey(64)
+	values := []*big.Int{big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
+	CP = NewECPrimeGroupKey(64 * len(values))
 	// Testing smallest number in range
-	if MRPVerify(MRPProve([]*big.Int{big.NewInt(0)})) {
+	if MRPVerify(MRPProve(values)) {
 		println("Multi Range Proof Verification works")
 	} else {
 		println("***** Multi Range Proof FAILURE")
