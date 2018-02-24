@@ -479,7 +479,7 @@ func Delta(y []*big.Int, z *big.Int) *big.Int {
 
 	// z^3<1^n, 2^n>
 	z3 := new(big.Int).Mod(new(big.Int).Mul(z2, z), CP.N)
-	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(64), CP.N), big.NewInt(1))
+	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(CP.V)), CP.N), big.NewInt(1))
 	t3 := new(big.Int).Mod(new(big.Int).Mul(z3, po2sum), CP.N)
 
 	result = new(big.Int).Mod(new(big.Int).Sub(t2, t3), CP.N)
@@ -582,14 +582,14 @@ func RPProve(v *big.Int) RangeProof {
 
 	rpresult := RangeProof{}
 
-	PowerOfTwos := PowerVector(64, big.NewInt(2))
+	PowerOfTwos := PowerVector(CP.V, big.NewInt(2))
 
 
 	if v.Cmp(big.NewInt(0)) == -1 {
 		panic("Value is below range! Not proving")
 	}
 
-	if v.Cmp(new(big.Int).Exp(big.NewInt(2), big.NewInt(64), CP.N)) == 1 {
+	if v.Cmp(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(CP.V)), CP.N)) == 1 {
 		panic("Value is above range! Not proving.")
 	}
 
@@ -600,7 +600,7 @@ func RPProve(v *big.Int) RangeProof {
 
 	// break up v into its bitwise representation
 	//aL := 0
-	aL := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64)))
+	aL := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", CP.V)))
 	aR := VectorAddScalar(aL, big.NewInt(-1))
 
 	alpha, err := rand.Int(rand.Reader, CP.N)
@@ -609,8 +609,8 @@ func RPProve(v *big.Int) RangeProof {
 	A := TwoVectorPCommit(aL, aR).Add(CP.CH.Mult(alpha))
 	rpresult.A = A
 
-	sL := RandVector(64)
-	sR := RandVector(64)
+	sL := RandVector(CP.V)
+	sR := RandVector(CP.V)
 
 	rho, err := rand.Int(rand.Reader, CP.N)
 	check(err)
@@ -647,7 +647,7 @@ func RPProve(v *big.Int) RangeProof {
 
 
 	 */
-	PowerOfCY := PowerVector(64, cy)
+	PowerOfCY := PowerVector(CP.V, cy)
 	// fmt.Println(PowerOfCY)
 	l0 := VectorAddScalar(aL, new(big.Int).Neg(cz))
 	// l1 := sL
@@ -740,11 +740,11 @@ func RPProve(v *big.Int) RangeProof {
 
 	//P1 := A.Add(S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.U.Mult(that)).Add(CP.CH.Mult(mu).Neg())
 
-	P2 := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
+	P := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
 	//fmt.Println(P1)
-	fmt.Println(P2)
+	//fmt.Println(P2)
 
-	rpresult.IPP = InnerProductProve(left, right, that, P2, CP.CH, CP.G, HPrime)
+	rpresult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.G, HPrime)
 
 	return rpresult
 }
@@ -771,7 +771,7 @@ func RPVerify(rp RangeProof) bool {
 	}
 
 	// given challenges are correct, very range proof
-	PowersOfY := PowerVector(64, cy)
+	PowersOfY := PowerVector(CP.V, cy)
 
 	// t_hat * G + tau * H
 	lhs := CP.CG.Mult(rp.Th).Add(CP.CH.Mult(rp.Tau))
@@ -795,7 +795,7 @@ func RPVerify(rp RangeProof) bool {
 		tmp1 = tmp1.Add(CP.G[i].Mult(zneg))
 	}
 
-	PowerOfTwos := PowerVector(64, big.NewInt(2))
+	PowerOfTwos := PowerVector(CP.V, big.NewInt(2))
 	tmp2 := CP.Zero()
 	// generate h'
 	HPrime := make([]ECPoint, len(CP.H))
@@ -811,15 +811,50 @@ func RPVerify(rp RangeProof) bool {
 		tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
 	}
 
-	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.CH.Mult(rp.Mu).Neg()) //.Add(CP.U.Mult(rp.Th))
-	fmt.Println(P)
 
-	if !InnerProductVerify(rp.Th, P, CP.CH, CP.G, HPrime, rp.IPP) {
+	// without subtracting this value should equal muCH + l[i]G[i] + r[i]H'[i]
+	// we want to make sure that the innerproduct checks out, so we subtract it
+	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.CH.Mult(rp.Mu).Neg())
+	//fmt.Println(P)
+
+	if !InnerProductVerify(rp.Th, P, CP.U, CP.G, HPrime, rp.IPP) {
 		fmt.Println("RPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}
 
 	return true
+}
+
+type MultiRangeProof struct {
+
+}
+
+/*
+MultiRangeProof Prove
+Takes in a list of values and provides an aggregate
+range proof for all the values.
+
+
+{(g, h \in G, \textbf{V} \in G^m ; \textbf{v, \gamma} \in Z_p^m) :
+	V_j = h^{\gamma_j}g^{v_j} \wedge v_j \in [0, 2^n - 1] \forall j \in [1, m]}
+ */
+func MRPProve(values []*big.Int) MultiRangeProof {
+	MRPResult := MultiRangeProof{}
+
+	// we concatenate the binary representation of the values
+
+	return MRPResult
+}
+
+/*
+MultiRangeProof Verify
+Takes in a MultiRangeProof and verifies its correctness
+
+ */
+func MRPVerify(mrp MultiRangeProof) bool {
+
+
+	return false
 }
 
 // NewECPrimeGroupKey returns the curve (field),
