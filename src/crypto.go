@@ -1084,7 +1084,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 		tmp1 := new(big.Int).Mul(gammas[j], zp)
 		vecRandomnessTotal = new(big.Int).Mod(new(big.Int).Add(vecRandomnessTotal, tmp1) , CP.N)
 	}
-	fmt.Println(vecRandomnessTotal)
+	//fmt.Println(vecRandomnessTotal)
 	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), CP.N)
 	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), CP.N)
 	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, vecRandomnessTotal)), CP.N)
@@ -1101,6 +1101,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	}
 
 	P := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
+	//fmt.Println(P)
 
 	MRPResult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.G, HPrime)
 
@@ -1172,7 +1173,7 @@ func MRPVerify(mrp MultiRangeProof) bool {
 		tmp1 = tmp1.Add(CP.G[i].Mult(zneg))
 	}
 
-	PowerOfTwos := PowerVector(CP.V, big.NewInt(2))
+	PowerOfTwos := PowerVector(bitsPerValue, big.NewInt(2))
 	tmp2 := CP.Zero()
 	// generate h'
 	HPrime := make([]ECPoint, len(CP.H))
@@ -1187,10 +1188,9 @@ func MRPVerify(mrp MultiRangeProof) bool {
 			val1 := new(big.Int).Mul(cz, PowersOfY[j*bitsPerValue + i])
 			zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), CP.N)
 			val2 := new(big.Int).Mod(new(big.Int).Mul(zp, PowerOfTwos[i]), CP.N)
-			tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
+			tmp2 = tmp2.Add(HPrime[j*bitsPerValue + i].Mult(new(big.Int).Add(val1, val2)))
 		}
 	}
-
 
 	// without subtracting this value should equal muCH + l[i]G[i] + r[i]H'[i]
 	// we want to make sure that the innerproduct checks out, so we subtract it
