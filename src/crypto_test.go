@@ -238,6 +238,15 @@ func TestRPVerify3(t *testing.T) {
 	}
 }
 
+func TestRPVerify4(t *testing.T) {
+	CP = NewECPrimeGroupKey(32)
+	// Testing smallest number in range
+	if RPVerify(RPProve(big.NewInt(0))) {
+		println("Range Proof Verification works")
+	} else {
+		println("*****Range Proof FAILURE")
+	}
+}
 
 func TestRPVerifyRand(t *testing.T) {
 	CP = NewECPrimeGroupKey(64)
@@ -277,7 +286,7 @@ func TestMultiRPVerify2(t *testing.T) {
 }
 
 func TestMultiRPVerify3(t *testing.T) {
-	values := []*big.Int{big.NewInt(0), big.NewInt(0)}
+	values := []*big.Int{big.NewInt(0), big.NewInt(1)}
 	CP = NewECPrimeGroupKey(64 * len(values))
 	// Testing smallest number in range
 	if MRPVerify(MRPProve(values)) {

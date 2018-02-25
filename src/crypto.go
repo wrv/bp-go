@@ -871,7 +871,8 @@ func DeltaMRP(y []*big.Int, z *big.Int, m int) *big.Int {
 	t2 := new(big.Int).Mod(new(big.Int).Mul(t1, VectorSum(y)), CP.N)
 
 	// \sum_j z^3+j<1^n, 2^n>
-	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(CP.V)), CP.N), big.NewInt(1))
+	// <1^n, 2^n> = 2^n - 1
+	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(CP.V/m)), CP.N), big.NewInt(1))
 	t3 := big.NewInt(0)
 
 	for j := 0; j < m; j++{
@@ -933,7 +934,8 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	aLConcat := make([]*big.Int, CP.V)
 	aRConcat := make([]*big.Int, CP.V)
 
-	for j, v := range values {
+	for j := range values {
+		v := values[j]
 		if v.Cmp(big.NewInt(0)) == -1 {
 			panic("Value is below range! Not proving")
 		}
@@ -983,7 +985,6 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	MRPResult.Cz = cz
 
 	zPowersTimesTwoVec := make([]*big.Int, CP.V)
-
 	for j := 0; j < m; j++ {
 		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), CP.N)
 		for i := 0; i < bitsPerValue; i ++{
@@ -1031,7 +1032,10 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), CP.N)
 	PowerOfCZ := PowerVector(m, cz)
 	for j := 0; j < m; j++{
-		vz2 = new(big.Int).Add(vz2, new(big.Int).Mul(PowerOfCZ[j], new(big.Int).Mul(values[j], z2)))
+		vz2 = new(big.Int).Add(vz2,
+			new(big.Int).Mul(
+				PowerOfCZ[j],
+				new(big.Int).Mul(values[j], z2)))
 		vz2 = new(big.Int).Mod(vz2, CP.N)
 	}
 
