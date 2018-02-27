@@ -267,7 +267,12 @@ func TestMultiRPVerify1(t *testing.T) {
 	values := []*big.Int{big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
 	CP = NewECPrimeGroupKey(64 * len(values))
 	// Testing smallest number in range
-	if MRPVerify(MRPProve(values)) {
+	proof := MRPProve(values)
+	proofString := fmt.Sprintf("%s", proof)
+
+	fmt.Println(len(proofString)) // length is good measure of bytes, correct?
+
+	if MRPVerify(proof) {
 		println("Multi Range Proof Verification works")
 	} else {
 		println("***** Multi Range Proof FAILURE")
@@ -293,6 +298,28 @@ func TestMultiRPVerify3(t *testing.T) {
 		println("Multi Range Proof Verification works")
 	} else {
 		println("***** Multi Range Proof FAILURE")
+	}
+}
+
+func TestMultiRPVerify4(t *testing.T) {
+	for j := 1; j < 33; j=2*j {
+		values := make([]*big.Int, j)
+		for k := 0; k < j; k++{
+			values[k] = big.NewInt(0)
+		}
+
+		CP = NewECPrimeGroupKey(64 * len(values))
+		// Testing smallest number in range
+		proof := MRPProve(values)
+		proofString := fmt.Sprintf("%s", proof)
+
+		fmt.Println(len(proofString)) // length is good measure of bytes, correct?
+
+		if MRPVerify(proof) {
+			println("Multi Range Proof Verification works")
+		} else {
+			println("***** Multi Range Proof FAILURE")
+		}
 	}
 }
 
@@ -350,3 +377,26 @@ func TestInnerProduct(t *testing.T) {
 }
 
 
+func BenchmarkMRPVerify(b *testing.B) {
+	for i := 0; i < b.N; i++{
+		for j := 1; j < 32; j*=2 {
+			values := make([]*big.Int, j)
+			for k := 0; k < j; k++{
+				values[k] = big.NewInt(0)
+			}
+
+			CP = NewECPrimeGroupKey(64 * len(values))
+			// Testing smallest number in range
+			proof := MRPProve(values)
+			proofString := fmt.Sprintf("%s", proof)
+			//fmt.Println(proofString)
+			fmt.Printf("Size for %d values: %d bytes\n", j, len(proofString)) // length is good measure of bytes, correct?
+
+			if MRPVerify(proof) {
+				println("Multi Range Proof Verification works")
+			} else {
+				println("***** Multi Range Proof FAILURE")
+			}
+		}
+	}
+}

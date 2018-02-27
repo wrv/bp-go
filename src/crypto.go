@@ -25,7 +25,6 @@ type ECPoint struct {
 	X, Y *big.Int
 }
 
-
 // Equal returns true if points p (self) and p2 (arg) are the same.
 func (p ECPoint) Equal(p2 ECPoint) bool {
 	if p.X.Cmp(p2.X) == 0 && p2.Y.Cmp(p2.Y) == 0 {
