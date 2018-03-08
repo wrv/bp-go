@@ -61,8 +61,8 @@ type CryptoParams struct{
 	N *big.Int				// scalar prime
 	U ECPoint				// a point that is a fixed group element with an unknown discrete-log relative to g,h
 	V int				// Vector length
-	CG ECPoint			// G value for commitments of a single value
-	CH ECPoint			// H value for commitments of a single value
+	G ECPoint			// G value for commitments of a single value
+	H ECPoint			// H value for commitments of a single value
 }
 
 func (c CryptoParams) Zero() ECPoint {
@@ -96,8 +96,8 @@ func VectorPCommit(value []*big.Int) (ECPoint, []*big.Int) {
 		modValue := new(big.Int).Mod(value[i], CP.N)
 
 		// mG, rH
-		lhsX, lhsY := CP.C.ScalarMult(CP.G[i].X, CP.G[i].Y, modValue.Bytes())
-		rhsX, rhsY := CP.C.ScalarMult(CP.H[i].X, CP.H[i].Y, r.Bytes())
+		lhsX, lhsY := CP.C.ScalarMult(CP.BPG[i].X, CP.BPG[i].Y, modValue.Bytes())
+		rhsX, rhsY := CP.C.ScalarMult(CP.BPH[i].X, CP.BPH[i].Y, r.Bytes())
 
 		commitment = commitment.Add(ECPoint{lhsX, lhsY}).Add(ECPoint{rhsX, rhsY})
 	}
@@ -121,7 +121,7 @@ func TwoVectorPCommit(a []*big.Int, b []*big.Int) (ECPoint) {
 	commitment := CP.Zero()
 
 	for i := 0; i < CP.V; i++{
-		commitment = commitment.Add(CP.G[i].Mult(a[i])).Add(CP.H[i].Mult(b[i]))
+		commitment = commitment.Add(CP.BPG[i].Mult(a[i])).Add(CP.BPH[i].Mult(b[i]))
 	}
 
 	return commitment
@@ -593,7 +593,7 @@ func RPProve(v *big.Int) RangeProof {
 
 	gamma, err := rand.Int(rand.Reader, CP.N)
 	check(err)
-	comm := CP.CG.Mult(v).Add(CP.CH.Mult(gamma))
+	comm := CP.G.Mult(v).Add(CP.H.Mult(gamma))
 	rpresult.Comm = comm
 
 	// break up v into its bitwise representation
@@ -604,7 +604,7 @@ func RPProve(v *big.Int) RangeProof {
 	alpha, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	A := TwoVectorPCommit(aL, aR).Add(CP.CH.Mult(alpha))
+	A := TwoVectorPCommit(aL, aR).Add(CP.H.Mult(alpha))
 	rpresult.A = A
 
 	sL := RandVector(CP.V)
@@ -613,7 +613,7 @@ func RPProve(v *big.Int) RangeProof {
 	rho, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	S := TwoVectorPCommit(sL, sR).Add(CP.CH.Mult(rho))
+	S := TwoVectorPCommit(sL, sR).Add(CP.H.Mult(rho))
 	rpresult.S = S
 
 	chal1s256 := sha256.Sum256([]byte(A.X.String() + A.Y.String()))
@@ -670,8 +670,8 @@ func RPProve(v *big.Int) RangeProof {
 	tau2, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	T1 := CP.CG.Mult(t1).Add(CP.CH.Mult(tau1)) //commitment to t1
-	T2 := CP.CG.Mult(t2).Add(CP.CH.Mult(tau2)) //commitment to t2
+	T1 := CP.G.Mult(t1).Add(CP.H.Mult(tau1)) //commitment to t1
+	T2 := CP.G.Mult(t2).Add(CP.H.Mult(tau2)) //commitment to t2
 
 	rpresult.T1 = T1
 	rpresult.T2 = T2
@@ -716,17 +716,17 @@ func RPProve(v *big.Int) RangeProof {
 	rpresult.Mu = mu
 
 
-	HPrime := make([]ECPoint, len(CP.H))
+	HPrime := make([]ECPoint, len(CP.BPH))
 
 	for i := range HPrime {
-		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
+		HPrime[i] = CP.BPH[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
 	}
 
 	// for testing
 	tmp1 := CP.Zero()
 	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), CP.N)
-	for i := range CP.G {
-		tmp1 = tmp1.Add(CP.G[i].Mult(zneg))
+	for i := range CP.BPG {
+		tmp1 = tmp1.Add(CP.BPG[i].Mult(zneg))
 	}
 
 	tmp2 := CP.Zero()
@@ -736,13 +736,13 @@ func RPProve(v *big.Int) RangeProof {
 		tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
 	}
 
-	//P1 := A.Add(S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.U.Mult(that)).Add(CP.CH.Mult(mu).Neg())
+	//P1 := A.Add(S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.U.Mult(that)).Add(CP.H.Mult(mu).Neg())
 
-	P := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
+	P := TwoVectorPCommitWithGens(CP.BPG, HPrime, left, right)
 	//fmt.Println(P1)
 	//fmt.Println(P2)
 
-	rpresult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.G, HPrime)
+	rpresult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.BPG, HPrime)
 
 	return rpresult
 }
@@ -772,11 +772,11 @@ func RPVerify(rp RangeProof) bool {
 	PowersOfY := PowerVector(CP.V, cy)
 
 	// t_hat * G + tau * H
-	lhs := CP.CG.Mult(rp.Th).Add(CP.CH.Mult(rp.Tau))
+	lhs := CP.G.Mult(rp.Th).Add(CP.H.Mult(rp.Tau))
 
 	// z^2 * V + delta(y,z) * G + x * T1 + x^2 * T2
 	rhs := rp.Comm.Mult(new(big.Int).Mul(cz, cz)).Add(
-		CP.CG.Mult(Delta(PowersOfY, cz))).Add(
+		CP.G.Mult(Delta(PowersOfY, cz))).Add(
 		rp.T1.Mult(cx)).Add(
 		rp.T2.Mult(new(big.Int).Mul(cx, cx)))
 
@@ -789,18 +789,18 @@ func RPVerify(rp RangeProof) bool {
 
 	tmp1 := CP.Zero()
 	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), CP.N)
-	for i := range CP.G {
-		tmp1 = tmp1.Add(CP.G[i].Mult(zneg))
+	for i := range CP.BPG {
+		tmp1 = tmp1.Add(CP.BPG[i].Mult(zneg))
 	}
 
 	PowerOfTwos := PowerVector(CP.V, big.NewInt(2))
 	tmp2 := CP.Zero()
 	// generate h'
-	HPrime := make([]ECPoint, len(CP.H))
+	HPrime := make([]ECPoint, len(CP.BPH))
 
 	for i := range HPrime {
 		mi := new(big.Int).ModInverse(PowersOfY[i], CP.N)
-		HPrime[i] = CP.H[i].Mult(mi)
+		HPrime[i] = CP.BPH[i].Mult(mi)
 	}
 
 	for i := range HPrime {
@@ -812,10 +812,10 @@ func RPVerify(rp RangeProof) bool {
 
 	// without subtracting this value should equal muCH + l[i]G[i] + r[i]H'[i]
 	// we want to make sure that the innerproduct checks out, so we subtract it
-	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.CH.Mult(rp.Mu).Neg())
+	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.H.Mult(rp.Mu).Neg())
 	//fmt.Println(P)
 
-	if !InnerProductVerify(rp.Th, P, CP.U, CP.G, HPrime, rp.IPP) {
+	if !InnerProductVerify(rp.Th, P, CP.U, CP.BPG, HPrime, rp.IPP) {
 		fmt.Println("RPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}
@@ -945,7 +945,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 
 		gamma, err := rand.Int(rand.Reader, CP.N)
 		check(err)
-		Comms[j] = CP.CG.Mult(v).Add(CP.CH.Mult(gamma))
+		Comms[j] = CP.G.Mult(v).Add(CP.H.Mult(gamma))
 		gammas[j] = gamma
 
 		// break up v into its bitwise representation
@@ -963,7 +963,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	alpha, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	A := TwoVectorPCommit(aLConcat, aRConcat).Add(CP.CH.Mult(alpha))
+	A := TwoVectorPCommit(aLConcat, aRConcat).Add(CP.H.Mult(alpha))
 	MRPResult.A = A
 
 	sL := RandVector(CP.V)
@@ -972,7 +972,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	rho, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	S := TwoVectorPCommit(sL, sR).Add(CP.CH.Mult(rho))
+	S := TwoVectorPCommit(sL, sR).Add(CP.H.Mult(rho))
 	MRPResult.S = S
 
 	chal1s256 := sha256.Sum256([]byte(A.X.String() + A.Y.String()))
@@ -1049,8 +1049,8 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	tau2, err := rand.Int(rand.Reader, CP.N)
 	check(err)
 
-	T1 := CP.CG.Mult(t1).Add(CP.CH.Mult(tau1)) //commitment to t1
-	T2 := CP.CG.Mult(t2).Add(CP.CH.Mult(tau2)) //commitment to t2
+	T1 := CP.G.Mult(t1).Add(CP.H.Mult(tau1)) //commitment to t1
+	T2 := CP.G.Mult(t2).Add(CP.H.Mult(tau2)) //commitment to t2
 
 	MRPResult.T1 = T1
 	MRPResult.T2 = T2
@@ -1093,16 +1093,16 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), CP.N)
 	MRPResult.Mu = mu
 
-	HPrime := make([]ECPoint, len(CP.H))
+	HPrime := make([]ECPoint, len(CP.BPH))
 
 	for i := range HPrime {
-		HPrime[i] = CP.H[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
+		HPrime[i] = CP.BPH[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
 	}
 
-	P := TwoVectorPCommitWithGens(CP.G, HPrime, left, right)
+	P := TwoVectorPCommitWithGens(CP.BPG, HPrime, left, right)
 	//fmt.Println(P)
 
-	MRPResult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.G, HPrime)
+	MRPResult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.BPG, HPrime)
 
 	return MRPResult
 }
@@ -1144,7 +1144,7 @@ func MRPVerify(mrp MultiRangeProof) bool {
 	PowersOfY := PowerVector(CP.V, cy)
 
 	// t_hat * G + tau * H
-	lhs := CP.CG.Mult(mrp.Th).Add(CP.CH.Mult(mrp.Tau))
+	lhs := CP.G.Mult(mrp.Th).Add(CP.H.Mult(mrp.Tau))
 
 	// z^2 * \bold{z}^m \bold{V} + delta(y,z) * G + x * T1 + x^2 * T2
 	CommPowers := CP.Zero()
@@ -1155,7 +1155,7 @@ func MRPVerify(mrp MultiRangeProof) bool {
 		CommPowers = CommPowers.Add(mrp.Comms[j].Mult(new(big.Int).Mul(z2, PowersOfZ[j])))
 	}
 
-	rhs := CP.CG.Mult(DeltaMRP(PowersOfY, cz, m)).Add(
+	rhs := CP.G.Mult(DeltaMRP(PowersOfY, cz, m)).Add(
 		mrp.T1.Mult(cx)).Add(
 		mrp.T2.Mult(new(big.Int).Mul(cx, cx))).Add(CommPowers)
 
@@ -1168,18 +1168,18 @@ func MRPVerify(mrp MultiRangeProof) bool {
 
 	tmp1 := CP.Zero()
 	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), CP.N)
-	for i := range CP.G {
-		tmp1 = tmp1.Add(CP.G[i].Mult(zneg))
+	for i := range CP.BPG {
+		tmp1 = tmp1.Add(CP.BPG[i].Mult(zneg))
 	}
 
 	PowerOfTwos := PowerVector(bitsPerValue, big.NewInt(2))
 	tmp2 := CP.Zero()
 	// generate h'
-	HPrime := make([]ECPoint, len(CP.H))
+	HPrime := make([]ECPoint, len(CP.BPH))
 
 	for i := range HPrime {
 		mi := new(big.Int).ModInverse(PowersOfY[i], CP.N)
-		HPrime[i] = CP.H[i].Mult(mi)
+		HPrime[i] = CP.BPH[i].Mult(mi)
 	}
 
 	for j := 0; j < m; j++ {
@@ -1193,10 +1193,10 @@ func MRPVerify(mrp MultiRangeProof) bool {
 
 	// without subtracting this value should equal muCH + l[i]G[i] + r[i]H'[i]
 	// we want to make sure that the innerproduct checks out, so we subtract it
-	P := mrp.A.Add(mrp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.CH.Mult(mrp.Mu).Neg())
+	P := mrp.A.Add(mrp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.H.Mult(mrp.Mu).Neg())
 	//fmt.Println(P)
 
-	if !InnerProductVerify(mrp.Th, P, CP.U, CP.G, HPrime, mrp.IPP) {
+	if !InnerProductVerify(mrp.Th, P, CP.U, CP.BPG, HPrime, mrp.IPP) {
 		fmt.Println("MRPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}

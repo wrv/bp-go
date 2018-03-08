@@ -21,9 +21,9 @@ func TestInnerProductProveLen1(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.BPG, CP.BPH)
 
-	if InnerProductVerify(c, P, CP.U, CP.G, CP.H, ipp){
+	if InnerProductVerify(c, P, CP.U, CP.BPG, CP.BPH, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -46,9 +46,9 @@ func TestInnerProductProveLen2(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.BPG, CP.BPH)
 
-	if InnerProductVerify(c, P,CP.U,CP.G, CP.H, ipp){
+	if InnerProductVerify(c, P,CP.U,CP.BPG, CP.BPH, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -76,9 +76,9 @@ func TestInnerProductProveLen4(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.BPG, CP.BPH)
 
-	if InnerProductVerify(c, P,CP.U,CP.G, CP.H, ipp){
+	if InnerProductVerify(c, P,CP.U,CP.BPG, CP.BPH, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -113,9 +113,9 @@ func TestInnerProductProveLen8(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.BPG, CP.BPH)
 
-	if InnerProductVerify(c, P,CP.U, CP.G, CP.H, ipp){
+	if InnerProductVerify(c, P,CP.U, CP.BPG, CP.BPH, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -132,9 +132,9 @@ func TestInnerProductProveLen64Rand(t *testing.T) {
 
 	P := TwoVectorPCommit(a, b)
 
-	ipp := InnerProductProve(a, b, c, P,CP.U, CP.G, CP.H)
+	ipp := InnerProductProve(a, b, c, P,CP.U, CP.BPG, CP.BPH)
 
-	if InnerProductVerify(c, P,CP.U,CP.G, CP.H, ipp){
+	if InnerProductVerify(c, P,CP.U,CP.BPG, CP.BPH, ipp){
 		println("Inner Product Proof correct")
 	} else {
 		println("Inner Product Proof incorrect")
@@ -339,8 +339,8 @@ func TestVectorPCommit3(t *testing.T) {
 	}
 	// we will verify correctness by replicating locally and comparing output
 
-	GVal := CP.G[0].Mult(v[0]).Add(CP.G[1].Mult(v[1]).Add(CP.G[2].Mult(v[2])))
-	HVal := CP.H[0].Mult(r[0]).Add(CP.H[1].Mult(r[1]).Add(CP.H[2].Mult(r[2])))
+	GVal := CP.BPG[0].Mult(v[0]).Add(CP.BPG[1].Mult(v[1]).Add(CP.BPG[2].Mult(v[2])))
+	HVal := CP.BPH[0].Mult(r[0]).Add(CP.BPH[1].Mult(r[1]).Add(CP.BPH[2].Mult(r[2])))
 	Comm := GVal.Add(HVal)
 
 	if output.Equal(Comm) {
