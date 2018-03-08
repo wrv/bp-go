@@ -56,8 +56,8 @@ func (p ECPoint) Neg() ECPoint {
 type CryptoParams struct{
 	C elliptic.Curve		// curve
 	KC *btcec.KoblitzCurve	// curve
-	G []ECPoint				// slice of gen 1
-	H []ECPoint				// slice of gen 2
+	BPG []ECPoint				// slice of gen 1 for BP
+	BPH []ECPoint				// slice of gen 2 for BP
 	N *big.Int				// scalar prime
 	U ECPoint				// a point that is a fixed group element with an unknown discrete-log relative to g,h
 	V int				// Vector length
