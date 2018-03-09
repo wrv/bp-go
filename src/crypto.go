@@ -14,7 +14,7 @@ import (
 	"fmt"
 )
 
-var CP CryptoParams
+var EC CryptoParams
 var VecLength = 64
 /*
 Implementation of BulletProofs
@@ -35,21 +35,21 @@ func (p ECPoint) Equal(p2 ECPoint) bool {
 
 // Mult multiplies point p by scalar s and returns the resulting point
 func (p ECPoint) Mult(s *big.Int) ECPoint {
-	modS := new(big.Int).Mod(s, CP.N)
-	X, Y := CP.C.ScalarMult(p.X, p.Y, modS.Bytes())
+	modS := new(big.Int).Mod(s, EC.N)
+	X, Y := EC.C.ScalarMult(p.X, p.Y, modS.Bytes())
 	return ECPoint{X, Y}
 }
 
 // Add adds points p and p2 and returns the resulting point
 func (p ECPoint) Add(p2 ECPoint) ECPoint {
-	X, Y := CP.C.Add(p.X, p.Y, p2.X, p2.Y)
+	X, Y := EC.C.Add(p.X, p.Y, p2.X, p2.Y)
 	return ECPoint{X, Y}
 }
 
 // Neg returns the additive inverse of point p
 func (p ECPoint) Neg() ECPoint {
 	negY := new(big.Int).Neg(p.Y)
-	modValue := negY.Mod(negY, CP.C.Params().P) // mod P is fine here because we're describing a curve point
+	modValue := negY.Mod(negY, EC.C.Params().P) // mod P is fine here because we're describing a curve point
 	return ECPoint{p.X, modValue}
 }
 
@@ -83,21 +83,21 @@ Given an array of values, we commit the array with different generators
 for each element and for each randomness.
  */
 func VectorPCommit(value []*big.Int) (ECPoint, []*big.Int) {
-	R := make([]*big.Int, CP.V)
+	R := make([]*big.Int, EC.V)
 
-	commitment := CP.Zero()
+	commitment := EC.Zero()
 
-	for i := 0; i < CP.V; i++{
-		r, err := rand.Int(rand.Reader, CP.N)
+	for i := 0; i < EC.V; i++{
+		r, err := rand.Int(rand.Reader, EC.N)
 		check(err)
 
 		R[i] = r
 
-		modValue := new(big.Int).Mod(value[i], CP.N)
+		modValue := new(big.Int).Mod(value[i], EC.N)
 
 		// mG, rH
-		lhsX, lhsY := CP.C.ScalarMult(CP.BPG[i].X, CP.BPG[i].Y, modValue.Bytes())
-		rhsX, rhsY := CP.C.ScalarMult(CP.BPH[i].X, CP.BPH[i].Y, r.Bytes())
+		lhsX, lhsY := EC.C.ScalarMult(EC.BPG[i].X, EC.BPG[i].Y, modValue.Bytes())
+		rhsX, rhsY := EC.C.ScalarMult(EC.BPH[i].X, EC.BPH[i].Y, r.Bytes())
 
 		commitment = commitment.Add(ECPoint{lhsX, lhsY}).Add(ECPoint{rhsX, rhsY})
 	}
@@ -118,10 +118,10 @@ func TwoVectorPCommit(a []*big.Int, b []*big.Int) (ECPoint) {
 		fmt.Printf("len(b): %d\n", len(b))
 	}
 
-	commitment := CP.Zero()
+	commitment := EC.Zero()
 
-	for i := 0; i < CP.V; i++{
-		commitment = commitment.Add(CP.BPG[i].Mult(a[i])).Add(CP.BPH[i].Mult(b[i]))
+	for i := 0; i < EC.V; i++{
+		commitment = commitment.Add(EC.BPG[i].Mult(a[i])).Add(EC.BPH[i].Mult(b[i]))
 	}
 
 	return commitment
@@ -145,11 +145,11 @@ func TwoVectorPCommitWithGens(G,H []ECPoint, a, b []*big.Int) (ECPoint) {
 		fmt.Printf("len(b): %d\n", len(b))
 	}
 
-	commitment := CP.Zero()
+	commitment := EC.Zero()
 
 	for i := 0; i < len(G); i++{
-		modA := new(big.Int).Mod(a[i], CP.N)
-		modB := new(big.Int).Mod(b[i], CP.N)
+		modA := new(big.Int).Mod(a[i], EC.N)
+		modB := new(big.Int).Mod(b[i], EC.N)
 
 		commitment = commitment.Add(G[i].Mult(modA)).Add(H[i].Mult(modB))
 	}
@@ -170,10 +170,10 @@ func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 
 	for i := range a{
 		tmp1 := new(big.Int).Mul(a[i], b[i])
-		c = new(big.Int).Add(c, new(big.Int).Mod(tmp1, CP.N))
+		c = new(big.Int).Add(c, new(big.Int).Mod(tmp1, EC.N))
 	}
 
-	return new(big.Int).Mod(c, CP.N)
+	return new(big.Int).Mod(c, EC.N)
 }
 
 func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
@@ -185,7 +185,7 @@ func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
 	result := make([]*big.Int, len(v))
 
 	for i := range v{
-		result[i] = new(big.Int).Mod(new(big.Int).Add(v[i], w[i]), CP.N)
+		result[i] = new(big.Int).Mod(new(big.Int).Add(v[i], w[i]), EC.N)
 	}
 
 	return result
@@ -201,7 +201,7 @@ func VectorHadamard(v, w []*big.Int) []*big.Int {
 	result := make([]*big.Int, len(v))
 
 	for i := range v {
-		result[i] = new(big.Int).Mod(new(big.Int).Mul(v[i], w[i]), CP.N)
+		result[i] = new(big.Int).Mod(new(big.Int).Mul(v[i], w[i]), EC.N)
 	}
 
 	return result
@@ -211,7 +211,7 @@ func VectorAddScalar(v []*big.Int, s *big.Int) []*big.Int {
 	result := make([]*big.Int, len(v))
 
 	for i := range v {
-		result[i] = new(big.Int).Mod(new(big.Int).Add(v[i], s), CP.N)
+		result[i] = new(big.Int).Mod(new(big.Int).Add(v[i], s), EC.N)
 	}
 
 	return result
@@ -222,7 +222,7 @@ func ScalarVectorMul(v []*big.Int, s *big.Int) []*big.Int {
 	result := make([]*big.Int, len(v))
 
 	for i := range v{
-		result[i] = new(big.Int).Mod(new(big.Int).Mul(v[i], s), CP.N)
+		result[i] = new(big.Int).Mod(new(big.Int).Mul(v[i], s), EC.N)
 	}
 
 	return result
@@ -250,7 +250,7 @@ func GenerateNewParams(G, H []ECPoint, x *big.Int, L, R, P ECPoint) ([]ECPoint, 
 	Gprime := make([]ECPoint, nprime)
 	Hprime := make([]ECPoint, nprime)
 
-	xinv := new(big.Int).ModInverse(x, CP.N)
+	xinv := new(big.Int).ModInverse(x, EC.N)
 
 	// Gprime = xinv * G[:nprime] + x*G[nprime:]
 	// Hprime = x * H[:nprime] + xinv*H[nprime:]
@@ -261,8 +261,8 @@ func GenerateNewParams(G, H []ECPoint, x *big.Int, L, R, P ECPoint) ([]ECPoint, 
 		Hprime[i] = H[i].Mult(x).Add(H[i+nprime].Mult(xinv))
 	}
 
-	x2 := new(big.Int).Mod(new(big.Int).Mul(x, x), CP.N)
-	xinv2 := new(big.Int).ModInverse(x2, CP.N)
+	x2 := new(big.Int).Mod(new(big.Int).Mul(x, x), EC.N)
+	xinv2 := new(big.Int).ModInverse(x2, EC.N)
 
 	Pprime := L.Mult(x2).Add(P).Add(R.Mult(xinv2)) // x^2 * L + P + xinv^2 * R
 
@@ -289,8 +289,8 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 	curIt := int(math.Log2(float64(len(a))))-1
 
 	nprime := len(a)/2
-	//println(nprime)
-	//println(len(H))
+	//fmt.Println(nprime)
+	//fmt.Println(len(H))
 	cl := InnerProduct(a[:nprime], b[nprime:]) // either this line
 	cr := InnerProduct(a[nprime:], b[:nprime]) // or this line
 	L := TwoVectorPCommitWithGens(G[nprime:], H[:nprime], a[:nprime], b[nprime:]).Add(u.Mult(cl))
@@ -310,7 +310,7 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 
 	Gprime, Hprime, Pprime := GenerateNewParams(G, H, x, L, R, P)
 	//fmt.Printf("Prover - Intermediate Pprime value: %s \n", Pprime)
-	xinv := new(big.Int).ModInverse(x, CP.N)
+	xinv := new(big.Int).ModInverse(x, EC.N)
 
 	// or these two lines
 	aprime := VectorAdd(
@@ -367,7 +367,7 @@ func InnerProductVerify(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdA
 	 curIt := len(ipp.Challenges)-1
 
 	 if ipp.Challenges[curIt].Cmp(chal1) != 0 {
-	 	println("IPVerify - Initial Challenge Failed")
+	 	fmt.Println("IPVerify - Initial Challenge Failed")
 	 	return false
 	 }
 
@@ -390,14 +390,14 @@ func InnerProductVerify(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdA
 		 chal2 := new(big.Int).SetBytes(s256[:])
 
 		 if ipp.Challenges[curIt].Cmp(chal2) != 0 {
-		 	println("IPVerify - Challenge verification failed at index " + strconv.Itoa(curIt))
+		 	fmt.Println("IPVerify - Challenge verification failed at index " + strconv.Itoa(curIt))
 		 	return false
 		 }
 
 		 Gprime, Hprime, Pprime = GenerateNewParams(Gprime, Hprime, chal2, Lval, Rval, Pprime)
 	 	curIt -= 1
 	 }
-	ccalc := new(big.Int).Mod(new(big.Int).Mul(ipp.A, ipp.B), CP.N)
+	ccalc := new(big.Int).Mod(new(big.Int).Mul(ipp.A, ipp.B), EC.N)
 
 	Pcalc1 := Gprime[0].Mult(ipp.A)
 	Pcalc2 := Hprime[0].Mult(ipp.B)
@@ -405,12 +405,93 @@ func InnerProductVerify(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdA
 	Pcalc := Pcalc1.Add(Pcalc2).Add(Pcalc3)
 
 	if !Pprime.Equal(Pcalc) {
-		println("IPVerify - Final Commitment checking failed")
+		fmt.Println("IPVerify - Final Commitment checking failed")
 		fmt.Printf("Final Pprime value: %s \n", Pprime)
 		fmt.Printf("Calculated Pprime value to check against: %s \n", Pcalc)
 		return false
 	}
 
+	return true
+}
+
+
+/* Inner Product Verify Fast
+Given a inner product proof, verifies the correctness of the proof. Does the same as above except
+we replace n separate exponentiations with a single multi-exponentiation.
+ */
+
+func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdArg) bool{
+	//fmt.Println("Verifying Inner Product Argument")
+	//fmt.Printf("Commitment Value: %s \n", P)
+	s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
+	chal1 := new(big.Int).SetBytes(s1[:])
+	ux := U.Mult(chal1)
+	curIt := len(ipp.Challenges)-1
+
+	// check all challenges
+	if ipp.Challenges[curIt].Cmp(chal1) != 0 {
+		fmt.Println("IPVerify - Initial Challenge Failed")
+		return false
+	}
+
+	for j:= curIt - 1; j >= 0; j-- {
+		Lval := ipp.L[j]
+		Rval := ipp.R[j]
+
+		// prover sends L & R and gets a challenge
+		s256 := sha256.Sum256([]byte(
+			Lval.X.String() + Lval.Y.String() +
+				Rval.X.String() + Rval.Y.String()))
+
+		chal2 := new(big.Int).SetBytes(s256[:])
+
+		if ipp.Challenges[j].Cmp(chal2) != 0 {
+			fmt.Println("IPVerify - Challenge verification failed at index " + strconv.Itoa(j))
+			return false
+		}
+	}
+	// begin computing
+
+	curIt -= 1
+	Pprime := P.Add(ux.Mult(c)) // line 6 from protocol 1
+
+	tmp1 := EC.Zero()
+	for j := curIt; j >= 0; j--{
+		x2 := new(big.Int).Exp(ipp.Challenges[j], big.NewInt(2), EC.N)
+		x2i := new(big.Int).ModInverse(x2, EC.N)
+		fmt.Println(tmp1)
+		tmp1 = ipp.L[j].Mult(x2).Add(ipp.R[j].Mult(x2i)).Add(tmp1)
+		fmt.Println(tmp1)
+	}
+	rhs := Pprime.Add(tmp1)
+
+	sScalars := make([]*big.Int, EC.V)
+	invsScalars := make([]*big.Int, EC.V)
+
+	for i := 0; i < EC.V; i++{
+		si := big.NewInt(1)
+		for j := curIt; j >= 0; j--{
+			//bij = 1 if the jth bit of i is 1, -1 otherwise
+			bij := big.NewInt(-1)
+			if  big.NewInt(int64(i)).Bit(j) == 1 {
+				bij = big.NewInt(1)
+			}
+			fmt.Printf("i, j, bij: (%d, %d, %d)\n", i, j, bij)
+			si = new(big.Int).Mod(new(big.Int).Mul(si, new(big.Int).Exp(ipp.Challenges[j], bij, EC.N)), EC.N)
+		}
+		sScalars[i] = si
+		invsScalars[i] = new(big.Int).ModInverse(si, EC.N)
+	}
+
+	ccalc := new(big.Int).Mod(new(big.Int).Mul(ipp.A, ipp.B), EC.N)
+	lhs := TwoVectorPCommitWithGens(G, H, ScalarVectorMul(sScalars, ipp.A), ScalarVectorMul(invsScalars, ipp.B)).Add(ux.Mult(ccalc))
+
+	if !rhs.Equal(lhs) {
+		fmt.Println("IPVerify - Final Commitment checking failed")
+		fmt.Printf("Final rhs value: %s \n", rhs)
+		fmt.Printf("Final lhs value: %s \n", lhs)
+		return false
+	}
 
 	return true
 }
@@ -435,7 +516,6 @@ func STRNot(str string) string {
 			result += "0"
 		}
 	}
-
 	return result
 }
 
@@ -467,7 +547,7 @@ func PowerVector(l int, base *big.Int) []*big.Int {
 	result := make([]*big.Int, l)
 
 	for i := 0; i < l; i++{
-		result[i] = new(big.Int).Exp(base, big.NewInt(int64(i)), CP.N)
+		result[i] = new(big.Int).Exp(base, big.NewInt(int64(i)), EC.N)
 	}
 
 	return result
@@ -477,7 +557,7 @@ func RandVector(l int) []*big.Int {
 	result := make([]*big.Int, l)
 
 	for i := 0; i < l; i++ {
-		x, err := rand.Int(rand.Reader, CP.N)
+		x, err := rand.Int(rand.Reader, EC.N)
 		check(err)
 		result[i] = x
 	}
@@ -489,7 +569,7 @@ func VectorSum(y []*big.Int) *big.Int{
 	result := big.NewInt(0)
 
 	for _,j := range y {
-		result = new(big.Int).Mod(new(big.Int).Add(result, j), CP.N)
+		result = new(big.Int).Mod(new(big.Int).Add(result, j), EC.N)
 	}
 
 	return result
@@ -522,16 +602,16 @@ func Delta(y []*big.Int, z *big.Int) *big.Int {
 	result := big.NewInt(0)
 
 	// (z-z^2)<1^n, y^n>
-	z2 := new(big.Int).Mod(new(big.Int).Mul(z, z), CP.N)
-	t1 := new(big.Int).Mod(new(big.Int).Sub(z, z2), CP.N)
-	t2 := new(big.Int).Mod(new(big.Int).Mul(t1, VectorSum(y)), CP.N)
+	z2 := new(big.Int).Mod(new(big.Int).Mul(z, z), EC.N)
+	t1 := new(big.Int).Mod(new(big.Int).Sub(z, z2), EC.N)
+	t2 := new(big.Int).Mod(new(big.Int).Mul(t1, VectorSum(y)), EC.N)
 
 	// z^3<1^n, 2^n>
-	z3 := new(big.Int).Mod(new(big.Int).Mul(z2, z), CP.N)
-	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(CP.V)), CP.N), big.NewInt(1))
-	t3 := new(big.Int).Mod(new(big.Int).Mul(z3, po2sum), CP.N)
+	z3 := new(big.Int).Mod(new(big.Int).Mul(z2, z), EC.N)
+	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(EC.V)), EC.N), big.NewInt(1))
+	t3 := new(big.Int).Mod(new(big.Int).Mul(z3, po2sum), EC.N)
 
-	result = new(big.Int).Mod(new(big.Int).Sub(t2, t3), CP.N)
+	result = new(big.Int).Mod(new(big.Int).Sub(t2, t3), EC.N)
 
 	return result
 }
@@ -559,7 +639,7 @@ func CalculateR(aR, sR, y, po2 []*big.Int, z, x *big.Int) []*big.Int {
 
 	result := make([]*big.Int, len(aR))
 
-	z2 := new(big.Int).Exp(z, big.NewInt(2), CP.N)
+	z2 := new(big.Int).Exp(z, big.NewInt(2), EC.N)
 	tmp11 := VectorAddScalar(aR, z)
 	tmp12 := ScalarVectorMul(sR, x)
 	tmp1 := VectorHadamard(y, VectorAdd(tmp11,tmp12))
@@ -580,40 +660,40 @@ func RPProve(v *big.Int) RangeProof {
 
 	rpresult := RangeProof{}
 
-	PowerOfTwos := PowerVector(CP.V, big.NewInt(2))
+	PowerOfTwos := PowerVector(EC.V, big.NewInt(2))
 
 
 	if v.Cmp(big.NewInt(0)) == -1 {
 		panic("Value is below range! Not proving")
 	}
 
-	if v.Cmp(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(CP.V)), CP.N)) == 1 {
+	if v.Cmp(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(EC.V)), EC.N)) == 1 {
 		panic("Value is above range! Not proving.")
 	}
 
-	gamma, err := rand.Int(rand.Reader, CP.N)
+	gamma, err := rand.Int(rand.Reader, EC.N)
 	check(err)
-	comm := CP.G.Mult(v).Add(CP.H.Mult(gamma))
+	comm := EC.G.Mult(v).Add(EC.H.Mult(gamma))
 	rpresult.Comm = comm
 
 	// break up v into its bitwise representation
 	//aL := 0
-	aL := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", CP.V)))
+	aL := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", EC.V)))
 	aR := VectorAddScalar(aL, big.NewInt(-1))
 
-	alpha, err := rand.Int(rand.Reader, CP.N)
+	alpha, err := rand.Int(rand.Reader, EC.N)
 	check(err)
 
-	A := TwoVectorPCommit(aL, aR).Add(CP.H.Mult(alpha))
+	A := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, aL, aR).Add(EC.H.Mult(alpha))
 	rpresult.A = A
 
-	sL := RandVector(CP.V)
-	sR := RandVector(CP.V)
+	sL := RandVector(EC.V)
+	sR := RandVector(EC.V)
 
-	rho, err := rand.Int(rand.Reader, CP.N)
+	rho, err := rand.Int(rand.Reader, EC.N)
 	check(err)
 
-	S := TwoVectorPCommit(sL, sR).Add(CP.H.Mult(rho))
+	S := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, sL, sR).Add(EC.H.Mult(rho))
 	rpresult.S = S
 
 	chal1s256 := sha256.Sum256([]byte(A.X.String() + A.Y.String()))
@@ -625,7 +705,7 @@ func RPProve(v *big.Int) RangeProof {
 	cz := new(big.Int).SetBytes(chal2s256[:])
 
 	rpresult.Cz = cz
-	z2 := new(big.Int).Exp(cz, big.NewInt(2), CP.N)
+	z2 := new(big.Int).Exp(cz, big.NewInt(2), EC.N)
 	// need to generate l(X), r(X), and t(X)=<l(X),r(X)>
 
 	/*
@@ -645,7 +725,7 @@ func RPProve(v *big.Int) RangeProof {
 
 
 	 */
-	PowerOfCY := PowerVector(CP.V, cy)
+	PowerOfCY := PowerVector(EC.V, cy)
 	// fmt.Println(PowerOfCY)
 	l0 := VectorAddScalar(aL, new(big.Int).Neg(cz))
 	// l1 := sL
@@ -659,19 +739,19 @@ func RPProve(v *big.Int) RangeProof {
 	r1 := VectorHadamard(sR, PowerOfCY)
 
 	//calculate t0
-	t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mul(v, z2), Delta(PowerOfCY, cz)),CP.N)
+	t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mul(v, z2), Delta(PowerOfCY, cz)),EC.N)
 
-	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(sL, r0), InnerProduct(l0, r1)), CP.N)
+	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(sL, r0), InnerProduct(l0, r1)), EC.N)
 	t2 := InnerProduct(sL, r1)
 
 	// given the t_i values, we can generate commitments to them
-	tau1, err := rand.Int(rand.Reader, CP.N)
+	tau1, err := rand.Int(rand.Reader, EC.N)
 	check(err)
-	tau2, err := rand.Int(rand.Reader, CP.N)
+	tau2, err := rand.Int(rand.Reader, EC.N)
 	check(err)
 
-	T1 := CP.G.Mult(t1).Add(CP.H.Mult(tau1)) //commitment to t1
-	T2 := CP.G.Mult(t2).Add(CP.H.Mult(tau2)) //commitment to t2
+	T1 := EC.G.Mult(t1).Add(EC.H.Mult(tau1)) //commitment to t1
+	T2 := EC.G.Mult(t2).Add(EC.H.Mult(tau2)) //commitment to t2
 
 	rpresult.T1 = T1
 	rpresult.T2 = T2
@@ -692,7 +772,7 @@ func RPProve(v *big.Int) RangeProof {
 					t1, cx),
 					new(big.Int).Mul(
 						new(big.Int).Mul(cx,cx),
-						t2))), CP.N)
+						t2))), EC.N)
 
 	that := InnerProduct(left, right) // NOTE: BP Java implementation calculates this from the t_i
 
@@ -705,44 +785,44 @@ func RPProve(v *big.Int) RangeProof {
 
 	rpresult.Th = thatPrime
 
-	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), CP.N)
-	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), CP.N)
-	taux3 := new(big.Int).Mod(new(big.Int).Mul(z2, gamma), CP.N)
-	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, taux3)), CP.N)
+	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), EC.N)
+	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), EC.N)
+	taux3 := new(big.Int).Mod(new(big.Int).Mul(z2, gamma), EC.N)
+	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, taux3)), EC.N)
 
 	rpresult.Tau = taux
 
-	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), CP.N)
+	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), EC.N)
 	rpresult.Mu = mu
 
 
-	HPrime := make([]ECPoint, len(CP.BPH))
+	HPrime := make([]ECPoint, len(EC.BPH))
 
 	for i := range HPrime {
-		HPrime[i] = CP.BPH[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
+		HPrime[i] = EC.BPH[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], EC.N))
 	}
 
 	// for testing
-	tmp1 := CP.Zero()
-	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), CP.N)
-	for i := range CP.BPG {
-		tmp1 = tmp1.Add(CP.BPG[i].Mult(zneg))
+	tmp1 := EC.Zero()
+	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), EC.N)
+	for i := range EC.BPG {
+		tmp1 = tmp1.Add(EC.BPG[i].Mult(zneg))
 	}
 
-	tmp2 := CP.Zero()
+	tmp2 := EC.Zero()
 	for i := range HPrime {
 		val1 := new(big.Int).Mul(cz, PowerOfCY[i])
 		val2 := new(big.Int).Mul(new(big.Int).Mul(cz, cz), PowerOfTwos[i])
 		tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
 	}
 
-	//P1 := A.Add(S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.U.Mult(that)).Add(CP.H.Mult(mu).Neg())
+	//P1 := A.Add(S.Mult(cx)).Add(tmp1).Add(tmp2).Add(EC.U.Mult(that)).Add(EC.H.Mult(mu).Neg())
 
-	P := TwoVectorPCommitWithGens(CP.BPG, HPrime, left, right)
+	P := TwoVectorPCommitWithGens(EC.BPG, HPrime, left, right)
 	//fmt.Println(P1)
 	//fmt.Println(P2)
 
-	rpresult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.BPG, HPrime)
+	rpresult.IPP = InnerProductProve(left, right, that, P, EC.U, EC.BPG, HPrime)
 
 	return rpresult
 }
@@ -769,14 +849,14 @@ func RPVerify(rp RangeProof) bool {
 	}
 
 	// given challenges are correct, very range proof
-	PowersOfY := PowerVector(CP.V, cy)
+	PowersOfY := PowerVector(EC.V, cy)
 
 	// t_hat * G + tau * H
-	lhs := CP.G.Mult(rp.Th).Add(CP.H.Mult(rp.Tau))
+	lhs := EC.G.Mult(rp.Th).Add(EC.H.Mult(rp.Tau))
 
 	// z^2 * V + delta(y,z) * G + x * T1 + x^2 * T2
 	rhs := rp.Comm.Mult(new(big.Int).Mul(cz, cz)).Add(
-		CP.G.Mult(Delta(PowersOfY, cz))).Add(
+		EC.G.Mult(Delta(PowersOfY, cz))).Add(
 		rp.T1.Mult(cx)).Add(
 		rp.T2.Mult(new(big.Int).Mul(cx, cx)))
 
@@ -787,20 +867,20 @@ func RPVerify(rp RangeProof) bool {
 		return false
 	}
 
-	tmp1 := CP.Zero()
-	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), CP.N)
-	for i := range CP.BPG {
-		tmp1 = tmp1.Add(CP.BPG[i].Mult(zneg))
+	tmp1 := EC.Zero()
+	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), EC.N)
+	for i := range EC.BPG {
+		tmp1 = tmp1.Add(EC.BPG[i].Mult(zneg))
 	}
 
-	PowerOfTwos := PowerVector(CP.V, big.NewInt(2))
-	tmp2 := CP.Zero()
+	PowerOfTwos := PowerVector(EC.V, big.NewInt(2))
+	tmp2 := EC.Zero()
 	// generate h'
-	HPrime := make([]ECPoint, len(CP.BPH))
+	HPrime := make([]ECPoint, len(EC.BPH))
 
 	for i := range HPrime {
-		mi := new(big.Int).ModInverse(PowersOfY[i], CP.N)
-		HPrime[i] = CP.BPH[i].Mult(mi)
+		mi := new(big.Int).ModInverse(PowersOfY[i], EC.N)
+		HPrime[i] = EC.BPH[i].Mult(mi)
 	}
 
 	for i := range HPrime {
@@ -812,10 +892,10 @@ func RPVerify(rp RangeProof) bool {
 
 	// without subtracting this value should equal muCH + l[i]G[i] + r[i]H'[i]
 	// we want to make sure that the innerproduct checks out, so we subtract it
-	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.H.Mult(rp.Mu).Neg())
+	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(EC.H.Mult(rp.Mu).Neg())
 	//fmt.Println(P)
 
-	if !InnerProductVerify(rp.Th, P, CP.U, CP.BPG, HPrime, rp.IPP) {
+	if !InnerProductVerify(rp.Th, P, EC.U, EC.BPG, HPrime, rp.IPP) {
 		fmt.Println("RPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}
@@ -865,22 +945,22 @@ func DeltaMRP(y []*big.Int, z *big.Int, m int) *big.Int {
 	result := big.NewInt(0)
 
 	// (z-z^2)<1^n, y^n>
-	z2 := new(big.Int).Mod(new(big.Int).Mul(z, z), CP.N)
-	t1 := new(big.Int).Mod(new(big.Int).Sub(z, z2), CP.N)
-	t2 := new(big.Int).Mod(new(big.Int).Mul(t1, VectorSum(y)), CP.N)
+	z2 := new(big.Int).Mod(new(big.Int).Mul(z, z), EC.N)
+	t1 := new(big.Int).Mod(new(big.Int).Sub(z, z2), EC.N)
+	t2 := new(big.Int).Mod(new(big.Int).Mul(t1, VectorSum(y)), EC.N)
 
 	// \sum_j z^3+j<1^n, 2^n>
 	// <1^n, 2^n> = 2^n - 1
-	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(CP.V/m)), CP.N), big.NewInt(1))
+	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(EC.V/m)), EC.N), big.NewInt(1))
 	t3 := big.NewInt(0)
 
 	for j := 0; j < m; j++{
-		zp := new(big.Int).Exp(z, big.NewInt(3+int64(j)), CP.N)
-		tmp1 := new(big.Int).Mod(new(big.Int).Mul(zp, po2sum), CP.N)
-		t3 = new(big.Int).Mod(new(big.Int).Add(t3, tmp1), CP.N)
+		zp := new(big.Int).Exp(z, big.NewInt(3+int64(j)), EC.N)
+		tmp1 := new(big.Int).Mod(new(big.Int).Mul(zp, po2sum), EC.N)
+		t3 = new(big.Int).Mod(new(big.Int).Add(t3, tmp1), EC.N)
 	}
 
-	result = new(big.Int).Mod(new(big.Int).Sub(t2, t3), CP.N)
+	result = new(big.Int).Mod(new(big.Int).Sub(t2, t3), EC.N)
 
 	return result
 }
@@ -917,12 +997,12 @@ changes:
 	V_j = h^{\gamma_j}g^{v_j} \wedge v_j \in [0, 2^n - 1] \forall j \in [1, m]}
  */
 func MRPProve(values []*big.Int) MultiRangeProof {
-	// CP.V has the total number of values and bits we can support
+	// EC.V has the total number of values and bits we can support
 
 	MRPResult := MultiRangeProof{}
 
 	m := len(values)
-	bitsPerValue := CP.V/m
+	bitsPerValue := EC.V/m
 
 	// we concatenate the binary representation of the values
 
@@ -930,8 +1010,8 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 
 	Comms := make([]ECPoint, m)
 	gammas := make([]*big.Int, m)
-	aLConcat := make([]*big.Int, CP.V)
-	aRConcat := make([]*big.Int, CP.V)
+	aLConcat := make([]*big.Int, EC.V)
+	aRConcat := make([]*big.Int, EC.V)
 
 	for j := range values {
 		v := values[j]
@@ -939,13 +1019,13 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 			panic("Value is below range! Not proving")
 		}
 
-		if v.Cmp(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(bitsPerValue)), CP.N)) == 1 {
+		if v.Cmp(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(bitsPerValue)), EC.N)) == 1 {
 			panic("Value is above range! Not proving.")
 		}
 
-		gamma, err := rand.Int(rand.Reader, CP.N)
+		gamma, err := rand.Int(rand.Reader, EC.N)
 		check(err)
-		Comms[j] = CP.G.Mult(v).Add(CP.H.Mult(gamma))
+		Comms[j] = EC.G.Mult(v).Add(EC.H.Mult(gamma))
 		gammas[j] = gamma
 
 		// break up v into its bitwise representation
@@ -960,19 +1040,19 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 
 	MRPResult.Comms = Comms
 
-	alpha, err := rand.Int(rand.Reader, CP.N)
+	alpha, err := rand.Int(rand.Reader, EC.N)
 	check(err)
 
-	A := TwoVectorPCommit(aLConcat, aRConcat).Add(CP.H.Mult(alpha))
+	A := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, aLConcat, aRConcat).Add(EC.H.Mult(alpha))
 	MRPResult.A = A
 
-	sL := RandVector(CP.V)
-	sR := RandVector(CP.V)
+	sL := RandVector(EC.V)
+	sR := RandVector(EC.V)
 
-	rho, err := rand.Int(rand.Reader, CP.N)
+	rho, err := rand.Int(rand.Reader, EC.N)
 	check(err)
 
-	S := TwoVectorPCommit(sL, sR).Add(CP.H.Mult(rho))
+	S := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, sL, sR).Add(EC.H.Mult(rho))
 	MRPResult.S = S
 
 	chal1s256 := sha256.Sum256([]byte(A.X.String() + A.Y.String()))
@@ -983,11 +1063,11 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	cz := new(big.Int).SetBytes(chal2s256[:])
 	MRPResult.Cz = cz
 
-	zPowersTimesTwoVec := make([]*big.Int, CP.V)
+	zPowersTimesTwoVec := make([]*big.Int, EC.V)
 	for j := 0; j < m; j++ {
-		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), CP.N)
+		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), EC.N)
 		for i := 0; i < bitsPerValue; i ++{
-			zPowersTimesTwoVec[j*bitsPerValue+i] = new(big.Int).Mod(new(big.Int).Mul(PowerOfTwos[i], zp), CP.N)
+			zPowersTimesTwoVec[j*bitsPerValue+i] = new(big.Int).Mod(new(big.Int).Mul(PowerOfTwos[i], zp), EC.N)
 		}
 	}
 
@@ -1015,7 +1095,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 		FieldVectorPolynomial rPoly = new FieldVectorPolynomial(r0, r1);
 
 	 */
-	PowerOfCY := PowerVector(CP.V, cy)
+	PowerOfCY := PowerVector(EC.V, cy)
 	// fmt.Println(PowerOfCY)
 	l0 := VectorAddScalar(aLConcat, new(big.Int).Neg(cz))
 	l1 := sL
@@ -1028,29 +1108,29 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 
 	//calculate t0
 	vz2 := big.NewInt(0)
-	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), CP.N)
+	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), EC.N)
 	PowerOfCZ := PowerVector(m, cz)
 	for j := 0; j < m; j++{
 		vz2 = new(big.Int).Add(vz2,
 			new(big.Int).Mul(
 				PowerOfCZ[j],
 				new(big.Int).Mul(values[j], z2)))
-		vz2 = new(big.Int).Mod(vz2, CP.N)
+		vz2 = new(big.Int).Mod(vz2, EC.N)
 	}
 
-	t0 := new(big.Int).Mod(new(big.Int).Add(vz2, DeltaMRP(PowerOfCY, cz, m)),CP.N)
+	t0 := new(big.Int).Mod(new(big.Int).Add(vz2, DeltaMRP(PowerOfCY, cz, m)),EC.N)
 
-	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(l1, r0), InnerProduct(l0, r1)), CP.N)
+	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(l1, r0), InnerProduct(l0, r1)), EC.N)
 	t2 := InnerProduct(l1, r1)
 
 	// given the t_i values, we can generate commitments to them
-	tau1, err := rand.Int(rand.Reader, CP.N)
+	tau1, err := rand.Int(rand.Reader, EC.N)
 	check(err)
-	tau2, err := rand.Int(rand.Reader, CP.N)
+	tau2, err := rand.Int(rand.Reader, EC.N)
 	check(err)
 
-	T1 := CP.G.Mult(t1).Add(CP.H.Mult(tau1)) //commitment to t1
-	T2 := CP.G.Mult(t2).Add(CP.H.Mult(tau2)) //commitment to t2
+	T1 := EC.G.Mult(t1).Add(EC.H.Mult(tau1)) //commitment to t1
+	T2 := EC.G.Mult(t2).Add(EC.H.Mult(tau2)) //commitment to t2
 
 	MRPResult.T1 = T1
 	MRPResult.T2 = T2
@@ -1064,7 +1144,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	right := CalculateRMRP(aRConcat, sR, PowerOfCY, zPowersTimesTwoVec, cz, cx)
 
 	thatPrime := new(big.Int).Mod( // t0 + t1*x + t2*x^2
-		new(big.Int).Add(t0, new(big.Int).Add(new(big.Int).Mul(t1, cx), new(big.Int).Mul(new(big.Int).Mul(cx,cx), t2))), CP.N)
+		new(big.Int).Add(t0, new(big.Int).Add(new(big.Int).Mul(t1, cx), new(big.Int).Mul(new(big.Int).Mul(cx,cx), t2))), EC.N)
 
 	that := InnerProduct(left, right) // NOTE: BP Java implementation calculates this from the t_i
 
@@ -1079,30 +1159,30 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 
 	vecRandomnessTotal := big.NewInt(0)
 	for j := 0; j < m; j++{
-		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), CP.N)
+		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), EC.N)
 		tmp1 := new(big.Int).Mul(gammas[j], zp)
-		vecRandomnessTotal = new(big.Int).Mod(new(big.Int).Add(vecRandomnessTotal, tmp1) , CP.N)
+		vecRandomnessTotal = new(big.Int).Mod(new(big.Int).Add(vecRandomnessTotal, tmp1) , EC.N)
 	}
 	//fmt.Println(vecRandomnessTotal)
-	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), CP.N)
-	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), CP.N)
-	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, vecRandomnessTotal)), CP.N)
+	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), EC.N)
+	taux2 := new(big.Int).Mod(new(big.Int).Mul(tau1, cx), EC.N)
+	taux := new(big.Int).Mod(new(big.Int).Add(taux1, new(big.Int).Add(taux2, vecRandomnessTotal)), EC.N)
 
 	MRPResult.Tau = taux
 
-	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), CP.N)
+	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), EC.N)
 	MRPResult.Mu = mu
 
-	HPrime := make([]ECPoint, len(CP.BPH))
+	HPrime := make([]ECPoint, len(EC.BPH))
 
 	for i := range HPrime {
-		HPrime[i] = CP.BPH[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], CP.N))
+		HPrime[i] = EC.BPH[i].Mult(new(big.Int).ModInverse(PowerOfCY[i], EC.N))
 	}
 
-	P := TwoVectorPCommitWithGens(CP.BPG, HPrime, left, right)
+	P := TwoVectorPCommitWithGens(EC.BPG, HPrime, left, right)
 	//fmt.Println(P)
 
-	MRPResult.IPP = InnerProductProve(left, right, that, P, CP.U, CP.BPG, HPrime)
+	MRPResult.IPP = InnerProductProve(left, right, that, P, EC.U, EC.BPG, HPrime)
 
 	return MRPResult
 }
@@ -1114,7 +1194,7 @@ Takes in a MultiRangeProof and verifies its correctness
  */
 func MRPVerify(mrp MultiRangeProof) bool {
 	m := len(mrp.Comms)
-	bitsPerValue := CP.V/m
+	bitsPerValue := EC.V/m
 
 	//changes:
 	// check 1 changes since it includes all commitments
@@ -1141,21 +1221,21 @@ func MRPVerify(mrp MultiRangeProof) bool {
 	}
 
 	// given challenges are correct, very range proof
-	PowersOfY := PowerVector(CP.V, cy)
+	PowersOfY := PowerVector(EC.V, cy)
 
 	// t_hat * G + tau * H
-	lhs := CP.G.Mult(mrp.Th).Add(CP.H.Mult(mrp.Tau))
+	lhs := EC.G.Mult(mrp.Th).Add(EC.H.Mult(mrp.Tau))
 
 	// z^2 * \bold{z}^m \bold{V} + delta(y,z) * G + x * T1 + x^2 * T2
-	CommPowers := CP.Zero()
+	CommPowers := EC.Zero()
 	PowersOfZ := PowerVector(m, cz)
-	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), CP.N)
+	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), EC.N)
 
 	for j := 0; j < m; j++{
 		CommPowers = CommPowers.Add(mrp.Comms[j].Mult(new(big.Int).Mul(z2, PowersOfZ[j])))
 	}
 
-	rhs := CP.G.Mult(DeltaMRP(PowersOfY, cz, m)).Add(
+	rhs := EC.G.Mult(DeltaMRP(PowersOfY, cz, m)).Add(
 		mrp.T1.Mult(cx)).Add(
 		mrp.T2.Mult(new(big.Int).Mul(cx, cx))).Add(CommPowers)
 
@@ -1166,37 +1246,37 @@ func MRPVerify(mrp MultiRangeProof) bool {
 		return false
 	}
 
-	tmp1 := CP.Zero()
-	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), CP.N)
-	for i := range CP.BPG {
-		tmp1 = tmp1.Add(CP.BPG[i].Mult(zneg))
+	tmp1 := EC.Zero()
+	zneg := new(big.Int).Mod(new(big.Int).Neg(cz), EC.N)
+	for i := range EC.BPG {
+		tmp1 = tmp1.Add(EC.BPG[i].Mult(zneg))
 	}
 
 	PowerOfTwos := PowerVector(bitsPerValue, big.NewInt(2))
-	tmp2 := CP.Zero()
+	tmp2 := EC.Zero()
 	// generate h'
-	HPrime := make([]ECPoint, len(CP.BPH))
+	HPrime := make([]ECPoint, len(EC.BPH))
 
 	for i := range HPrime {
-		mi := new(big.Int).ModInverse(PowersOfY[i], CP.N)
-		HPrime[i] = CP.BPH[i].Mult(mi)
+		mi := new(big.Int).ModInverse(PowersOfY[i], EC.N)
+		HPrime[i] = EC.BPH[i].Mult(mi)
 	}
 
 	for j := 0; j < m; j++ {
 		for i := 0; i < bitsPerValue; i++ {
 			val1 := new(big.Int).Mul(cz, PowersOfY[j*bitsPerValue + i])
-			zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), CP.N)
-			val2 := new(big.Int).Mod(new(big.Int).Mul(zp, PowerOfTwos[i]), CP.N)
+			zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), EC.N)
+			val2 := new(big.Int).Mod(new(big.Int).Mul(zp, PowerOfTwos[i]), EC.N)
 			tmp2 = tmp2.Add(HPrime[j*bitsPerValue + i].Mult(new(big.Int).Add(val1, val2)))
 		}
 	}
 
 	// without subtracting this value should equal muCH + l[i]G[i] + r[i]H'[i]
 	// we want to make sure that the innerproduct checks out, so we subtract it
-	P := mrp.A.Add(mrp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(CP.H.Mult(mrp.Mu).Neg())
+	P := mrp.A.Add(mrp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(EC.H.Mult(mrp.Mu).Neg())
 	//fmt.Println(P)
 
-	if !InnerProductVerify(mrp.Th, P, CP.U, CP.BPG, HPrime, mrp.IPP) {
+	if !InnerProductVerify(mrp.Th, P, EC.U, EC.BPG, HPrime, mrp.IPP) {
 		fmt.Println("MRPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}
@@ -1231,7 +1311,7 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 		if err == nil{
 			if confirmed == 2*n{ // once we've generated all g and h values then assign this to u
 				u = ECPoint{gen2.X, gen2.Y}
-				//println("Got that U value")
+				//fmt.Println("Got that U value")
 			} else if confirmed == 2*n +1 {
 				cg = ECPoint{gen2.X, gen2.Y}
 
@@ -1240,10 +1320,10 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 			} else {
 				if confirmed%2 == 0 {
 					gen1Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
-					//println("new G Value")
+					//fmt.Println("new G Value")
 				} else {
 					gen2Vals[confirmed/2] = ECPoint{gen2.X, gen2.Y}
-					//println("new H value")
+					//fmt.Println("new H value")
 				}
 			}
 			confirmed += 1
@@ -1266,6 +1346,6 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 
 
 func init() {
-	CP = NewECPrimeGroupKey(VecLength)
-	//fmt.Println(CP)
+	EC = NewECPrimeGroupKey(VecLength)
+	//fmt.Println(EC)
 }

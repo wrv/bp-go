@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="370c4cb5-3c12-4ff5-a881-a74423052a43" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/src/crypto.go" afterPath="$PROJECT_DIR$/src/crypto.go" />
       <change beforePath="$PROJECT_DIR$/src/crypto_test.go" afterPath="$PROJECT_DIR$/src/crypto_test.go" />
@@ -18,11 +19,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="crypto.go" pinned="false" current-in-tab="false">
+      <file leaf-file-name="crypto.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/crypto.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="277">
-              <caret line="65" column="1" lean-forward="true" selection-start-line="65" selection-start-column="1" selection-end-line="65" selection-end-column="1" />
+            <state relative-caret-position="440">
+              <caret line="481" column="17" lean-forward="false" selection-start-line="481" selection-start-column="17" selection-end-line="481" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -41,11 +42,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="crypto_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+            <state relative-caret-position="5967">
+              <caret line="510" column="15" lean-forward="false" selection-start-line="510" selection-start-column="15" selection-end-line="510" selection-end-column="15" />
               <folding>
                 <element signature="e#12#67#0" expanded="true" />
               </folding>
@@ -75,12 +76,17 @@
       <find>CP.H</find>
       <find>CP.CH</find>
       <find>CP.CG</find>
+      <find>CP</find>
+      <find>TwoVectorPCommit</find>
+      <find>println</find>
     </findStrings>
     <replaceStrings>
       <replace>CP.BPG</replace>
       <replace>CP.BPH</replace>
       <replace>CP.H</replace>
       <replace>CP.G</replace>
+      <replace>EC</replace>
+      <replace>fmt.Println</replace>
     </replaceStrings>
   </component>
   <component name="GOROOT" path="C:\Go" />
@@ -92,6 +98,7 @@
       <list>
         <option value="$PROJECT_DIR$/src/Crypto.go" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/src/crypto_test.go" />
         <option value="$PROJECT_DIR$/src/crypto.go" />
       </list>
@@ -104,9 +111,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-7" />
-    <option name="width" value="974" />
-    <option name="height" value="1047" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -162,7 +170,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.go test github.com/wrv/bp-go/src">
+  <component name="RunManager" selected="Go Test.TestInnerProductVerifyFastLen2 in crypto_test.go">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -171,41 +179,41 @@
       <filePath value="$PROJECT_DIR$/" />
       <directory value="$PROJECT_DIR$/" />
     </configuration>
-    <configuration name="TestInnerProductProveLen8 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="TestInnerProductVerifyFastLen1 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/src" />
       <go_parameters value="-i" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="github.com/wrv/bp-go/src" />
-      <pattern value="^TestInnerProductProveLen8$" />
+      <pattern value="^TestInnerProductVerifyFastLen1$" />
     </configuration>
-    <configuration name="TestRPVerify1 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="TestInnerProductVerifyFastLen2 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/src" />
       <go_parameters value="-i" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="github.com/wrv/bp-go/src" />
-      <pattern value="^TestRPVerify1$" />
+      <pattern value="^TestInnerProductVerifyFastLen2$" />
     </configuration>
-    <configuration name="TestValueBreakdown in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="TestInnerProductVerifyFastLen4 in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/src" />
       <go_parameters value="-i" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="github.com/wrv/bp-go/src" />
-      <pattern value="^TestValueBreakdown$" />
+      <pattern value="^TestInnerProductVerifyFastLen4$" />
     </configuration>
-    <configuration name="TestVectorHadamard in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="TestInnerProductVerifyFastLen64Rand in crypto_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="bp-go" />
       <working_directory value="$PROJECT_DIR$/src" />
       <go_parameters value="-i" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
       <package value="github.com/wrv/bp-go/src" />
-      <pattern value="^TestVectorHadamard$" />
+      <pattern value="^TestInnerProductVerifyFastLen64Rand$" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="bp-go" />
@@ -223,19 +231,19 @@
       <package value="github.com/wrv/bp-go/src" />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen8 in crypto_test.go" />
-      <item index="1" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
-      <item index="2" class="java.lang.String" itemvalue="Go Test.TestValueBreakdown in crypto_test.go" />
-      <item index="3" class="java.lang.String" itemvalue="Go Test.TestVectorHadamard in crypto_test.go" />
-      <item index="4" class="java.lang.String" itemvalue="Go Test.TestRPVerify1 in crypto_test.go" />
+      <item index="0" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
+      <item index="1" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen1 in crypto_test.go" />
+      <item index="2" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen2 in crypto_test.go" />
+      <item index="3" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen4 in crypto_test.go" />
+      <item index="4" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen64Rand in crypto_test.go" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
-        <item index="1" class="java.lang.String" itemvalue="Go Test.TestRPVerify1 in crypto_test.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Test.TestVectorHadamard in crypto_test.go" />
-        <item index="3" class="java.lang.String" itemvalue="Go Test.TestValueBreakdown in crypto_test.go" />
-        <item index="4" class="java.lang.String" itemvalue="Go Test.TestInnerProductProveLen8 in crypto_test.go" />
+        <item index="0" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen2 in crypto_test.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen1 in crypto_test.go" />
+        <item index="2" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen64Rand in crypto_test.go" />
+        <item index="3" class="java.lang.String" itemvalue="Go Test.TestInnerProductVerifyFastLen4 in crypto_test.go" />
+        <item index="4" class="java.lang.String" itemvalue="Go Test.go test github.com/wrv/bp-go/src" />
       </list>
     </recent_temporary>
   </component>
@@ -243,42 +251,42 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TestHistory">
-    <history-entry file="TestRPVerify1_in_crypto_test_go - 2018.02.23 at 13h 01m 08s.xml">
-      <configuration name="TestRPVerify1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen1_in_crypto_test_go - 2018.03.09 at 15h 26m 13s.xml">
+      <configuration name="TestInnerProductVerifyFastLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestValueBreakdown_in_crypto_test_go - 2018.02.20 at 20h 17m 52s.xml">
-      <configuration name="TestValueBreakdown in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen1_in_crypto_test_go - 2018.03.09 at 15h 26m 21s.xml">
+      <configuration name="TestInnerProductVerifyFastLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestValueBreakdown_in_crypto_test_go - 2018.02.20 at 23h 01m 00s.xml">
-      <configuration name="TestValueBreakdown in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen1_in_crypto_test_go - 2018.03.09 at 15h 30m 35s.xml">
+      <configuration name="TestInnerProductVerifyFastLen1 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestVectorHadamard_in_crypto_test_go - 2018.02.23 at 12h 48m 20s.xml">
-      <configuration name="TestVectorHadamard in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen2_in_crypto_test_go - 2018.03.09 at 15h 17m 07s.xml">
+      <configuration name="TestInnerProductVerifyFastLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestVectorHadamard_in_crypto_test_go - 2018.02.23 at 12h 49m 20s.xml">
-      <configuration name="TestVectorHadamard in crypto_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen2_in_crypto_test_go - 2018.03.09 at 15h 23m 31s.xml">
+      <configuration name="TestInnerProductVerifyFastLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.20 at 23h 02m 11s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen2_in_crypto_test_go - 2018.03.09 at 15h 26m 29s.xml">
+      <configuration name="TestInnerProductVerifyFastLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.20 at 23h 03m 44s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen2_in_crypto_test_go - 2018.03.09 at 15h 30m 42s.xml">
+      <configuration name="TestInnerProductVerifyFastLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.20 at 23h 03m 59s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen2_in_crypto_test_go - 2018.03.09 at 15h 33m 08s.xml">
+      <configuration name="TestInnerProductVerifyFastLen2 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.02.23 at 12h 33m 17s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen4_in_crypto_test_go - 2018.03.09 at 15h 26m 35s.xml">
+      <configuration name="TestInnerProductVerifyFastLen4 in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_wrv_bp-go_src - 2018.03.07 at 23h 42m 38s.xml">
-      <configuration name="go test github.com/wrv/bp-go/src" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestInnerProductVerifyFastLen64Rand_in_crypto_test_go - 2018.03.09 at 15h 29m 12s.xml">
+      <configuration name="TestInnerProductVerifyFastLen64Rand in crypto_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12313433" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.081023455" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32925683" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -306,7 +314,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="5" />
+      <option name="time" value="6" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -552,21 +560,29 @@
       </provider>
     </entry>
     <entry file="file:///usr/lib/go-1.6/src/math/big/int.go" />
-    <entry file="file://$PROJECT_DIR$/src/crypto.go">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="277">
-          <caret line="65" column="1" lean-forward="true" selection-start-line="65" selection-start-column="1" selection-end-line="65" selection-end-column="1" />
+        <state relative-caret-position="17">
+          <caret line="1" column="6" lean-forward="true" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/crypto_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+        <state relative-caret-position="5967">
+          <caret line="510" column="15" lean-forward="false" selection-start-line="510" selection-start-column="15" selection-end-line="510" selection-end-column="15" />
           <folding>
             <element signature="e#12#67#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/crypto.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="440">
+          <caret line="481" column="17" lean-forward="false" selection-start-line="481" selection-start-column="17" selection-end-line="481" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>
