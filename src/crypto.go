@@ -896,7 +896,7 @@ func RPVerify(rp RangeProof) bool {
 	P := rp.A.Add(rp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(EC.H.Mult(rp.Mu).Neg())
 	//fmt.Println(P)
 
-	if !InnerProductVerify(rp.Th, P, EC.U, EC.BPG, HPrime, rp.IPP) {
+	if !InnerProductVerifyFast(rp.Th, P, EC.U, EC.BPG, HPrime, rp.IPP) {
 		fmt.Println("RPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}
@@ -1277,7 +1277,7 @@ func MRPVerify(mrp MultiRangeProof) bool {
 	P := mrp.A.Add(mrp.S.Mult(cx)).Add(tmp1).Add(tmp2).Add(EC.H.Mult(mrp.Mu).Neg())
 	//fmt.Println(P)
 
-	if !InnerProductVerify(mrp.Th, P, EC.U, EC.BPG, HPrime, mrp.IPP) {
+	if !InnerProductVerifyFast(mrp.Th, P, EC.U, EC.BPG, HPrime, mrp.IPP) {
 		fmt.Println("MRPVerify - Uh oh! Check line (65) of verification!")
 		return false
 	}
