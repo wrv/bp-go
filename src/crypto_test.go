@@ -182,9 +182,9 @@ func TestInnerProductVerifyFastLen2(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerifyFast(c, P,EC.U,EC.BPG, EC.BPH, ipp){
+	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp){
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")

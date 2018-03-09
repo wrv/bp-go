@@ -459,9 +459,9 @@ func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerP
 	for j := curIt; j >= 0; j--{
 		x2 := new(big.Int).Exp(ipp.Challenges[j], big.NewInt(2), EC.N)
 		x2i := new(big.Int).ModInverse(x2, EC.N)
-		fmt.Println(tmp1)
+		//fmt.Println(tmp1)
 		tmp1 = ipp.L[j].Mult(x2).Add(ipp.R[j].Mult(x2i)).Add(tmp1)
-		fmt.Println(tmp1)
+		//fmt.Println(tmp1)
 	}
 	rhs := Pprime.Add(tmp1)
 
@@ -471,14 +471,15 @@ func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerP
 	for i := 0; i < EC.V; i++{
 		si := big.NewInt(1)
 		for j := curIt; j >= 0; j--{
-			//bij = 1 if the jth bit of i is 1, -1 otherwise
-			bij := big.NewInt(-1)
-			if  big.NewInt(int64(i)).Bit(j) == 1 {
-				bij = big.NewInt(1)
+			// original challenge if the jth bit of i is 1, inverse challenge otherwise
+			chal := ipp.Challenges[j]
+			if  big.NewInt(int64(i)).Bit(j) == 0 {
+				chal = new(big.Int).ModInverse(chal, EC.N)
 			}
-			fmt.Printf("i, j, bij: (%d, %d, %d)\n", i, j, bij)
-			si = new(big.Int).Mod(new(big.Int).Mul(si, new(big.Int).Exp(ipp.Challenges[j], bij, EC.N)), EC.N)
+			// fmt.Printf("Challenge raised to value: %d\n", chal)
+			si = new(big.Int).Mod(new(big.Int).Mul(si, chal), EC.N)
 		}
+		//fmt.Printf("Si value: %d\n", si)
 		sScalars[i] = si
 		invsScalars[i] = new(big.Int).ModInverse(si, EC.N)
 	}
