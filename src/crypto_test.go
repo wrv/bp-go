@@ -1,10 +1,10 @@
 package bp
 
 import (
-	"testing"
-	"math/big"
-	"fmt"
 	"crypto/rand"
+	"fmt"
+	"math/big"
+	"testing"
 )
 
 func TestInnerProductProveLen1(t *testing.T) {
@@ -21,9 +21,9 @@ func TestInnerProductProveLen1(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerify(c, P, EC.U, EC.BPG, EC.BPH, ipp){
+	if InnerProductVerify(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -46,15 +46,14 @@ func TestInnerProductProveLen2(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerify(c, P,EC.U,EC.BPG, EC.BPH, ipp){
+	if InnerProductVerify(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
 	}
 }
-
 
 func TestInnerProductProveLen4(t *testing.T) {
 	fmt.Println("TestInnerProductProve4")
@@ -76,9 +75,9 @@ func TestInnerProductProveLen4(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerify(c, P,EC.U,EC.BPG, EC.BPH, ipp){
+	if InnerProductVerify(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -113,9 +112,9 @@ func TestInnerProductProveLen8(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerify(c, P,EC.U, EC.BPG, EC.BPH, ipp){
+	if InnerProductVerify(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -132,9 +131,9 @@ func TestInnerProductProveLen64Rand(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerify(c, P,EC.U,EC.BPG, EC.BPH, ipp){
+	if InnerProductVerify(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -157,9 +156,9 @@ func TestInnerProductVerifyFastLen1(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp){
+	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -184,13 +183,12 @@ func TestInnerProductVerifyFastLen2(t *testing.T) {
 
 	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp){
+	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
 	}
 }
-
 
 func TestInnerProductVerifyFastLen4(t *testing.T) {
 	fmt.Println("TestInnerProductProve4")
@@ -212,9 +210,9 @@ func TestInnerProductVerifyFastLen4(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerifyFast(c, P,EC.U,EC.BPG, EC.BPH, ipp){
+	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -249,9 +247,9 @@ func TestInnerProductVerifyFastLen8(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerifyFast(c, P,EC.U, EC.BPG, EC.BPH, ipp){
+	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -268,9 +266,9 @@ func TestInnerProductVerifyFastLen64Rand(t *testing.T) {
 
 	P := TwoVectorPCommitWithGens(EC.BPG, EC.BPH, a, b)
 
-	ipp := InnerProductProve(a, b, c, P,EC.U, EC.BPG, EC.BPH)
+	ipp := InnerProductProve(a, b, c, P, EC.U, EC.BPG, EC.BPH)
 
-	if InnerProductVerifyFast(c, P,EC.U,EC.BPG, EC.BPH, ipp){
+	if InnerProductVerifyFast(c, P, EC.U, EC.BPG, EC.BPH, ipp) {
 		fmt.Println("Inner Product Proof correct")
 	} else {
 		t.Error("Inner Product Proof incorrect")
@@ -279,9 +277,7 @@ func TestInnerProductVerifyFastLen64Rand(t *testing.T) {
 
 }
 
-
-
-func TestValueBreakdown(t *testing.T){
+func TestValueBreakdown(t *testing.T) {
 	v := big.NewInt(20)
 	yes := reverse(StrToBigIntArray(PadLeft(fmt.Sprintf("%b", v), "0", 64)))
 	vec2 := PowerVector(64, big.NewInt(2))
@@ -301,7 +297,7 @@ func TestValueBreakdown(t *testing.T){
 	}
 }
 
-func TestValueBreakdownRand(t *testing.T){
+func TestValueBreakdownRand(t *testing.T) {
 	v, err := rand.Int(rand.Reader, new(big.Int).Exp(big.NewInt(2), big.NewInt(64), EC.N))
 	check(err)
 
@@ -338,7 +334,7 @@ func TestVectorHadamard(t *testing.T) {
 			success = false
 		}
 	}
-	if !success{
+	if !success {
 		t.Error("Failure in the Hadamard")
 	} else {
 		fmt.Println("Hadamard good")
@@ -364,7 +360,6 @@ func TestRPVerify2(t *testing.T) {
 		t.Error("*****Range Proof FAILURE")
 	}
 }
-
 
 func TestRPVerify3(t *testing.T) {
 	EC = NewECPrimeGroupKey(64)
@@ -440,9 +435,9 @@ func TestMultiRPVerify3(t *testing.T) {
 }
 
 func TestMultiRPVerify4(t *testing.T) {
-	for j := 1; j < 33; j=2*j {
+	for j := 1; j < 33; j = 2 * j {
 		values := make([]*big.Int, j)
-		for k := 0; k < j; k++{
+		for k := 0; k < j; k++ {
 			values[k] = big.NewInt(0)
 		}
 
@@ -507,7 +502,7 @@ func TestInnerProduct(t *testing.T) {
 
 	if c.Cmp(big.NewInt(16)) == 0 {
 		fmt.Println("Success - Innerproduct works with 2")
-	} else{
+	} else {
 		t.Error("Failure - Innerproduct equal to ")
 		fmt.Println(c.String())
 	}

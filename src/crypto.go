@@ -1,6 +1,5 @@
 package bp
 
-
 import (
 	"crypto/elliptic"
 	"crypto/rand"
@@ -8,14 +7,15 @@ import (
 	"encoding/binary"
 	"math/big"
 
+	"fmt"
 	"github.com/btcsuite/btcd/btcec"
 	"math"
 	"strconv"
-	"fmt"
 )
 
 var EC CryptoParams
 var VecLength = 64
+
 /*
 Implementation of BulletProofs
 
@@ -53,22 +53,21 @@ func (p ECPoint) Neg() ECPoint {
 	return ECPoint{p.X, modValue}
 }
 
-type CryptoParams struct{
-	C elliptic.Curve		// curve
-	KC *btcec.KoblitzCurve	// curve
-	BPG []ECPoint				// slice of gen 1 for BP
-	BPH []ECPoint				// slice of gen 2 for BP
-	N *big.Int				// scalar prime
-	U ECPoint				// a point that is a fixed group element with an unknown discrete-log relative to g,h
-	V int				// Vector length
-	G ECPoint			// G value for commitments of a single value
-	H ECPoint			// H value for commitments of a single value
+type CryptoParams struct {
+	C   elliptic.Curve      // curve
+	KC  *btcec.KoblitzCurve // curve
+	BPG []ECPoint           // slice of gen 1 for BP
+	BPH []ECPoint           // slice of gen 2 for BP
+	N   *big.Int            // scalar prime
+	U   ECPoint             // a point that is a fixed group element with an unknown discrete-log relative to g,h
+	V   int                 // Vector length
+	G   ECPoint             // G value for commitments of a single value
+	H   ECPoint             // H value for commitments of a single value
 }
 
 func (c CryptoParams) Zero() ECPoint {
 	return ECPoint{big.NewInt(0), big.NewInt(0)}
 }
-
 
 func check(e error) {
 	if e != nil {
@@ -81,13 +80,13 @@ Vector Pedersen Commitment
 
 Given an array of values, we commit the array with different generators
 for each element and for each randomness.
- */
+*/
 func VectorPCommit(value []*big.Int) (ECPoint, []*big.Int) {
 	R := make([]*big.Int, EC.V)
 
 	commitment := EC.Zero()
 
-	for i := 0; i < EC.V; i++{
+	for i := 0; i < EC.V; i++ {
 		r, err := rand.Int(rand.Reader, EC.N)
 		check(err)
 
@@ -110,8 +109,8 @@ Two Vector P Commit
 
 Given an array of values, we commit the array with different generators
 for each element and for each randomness.
- */
-func TwoVectorPCommit(a []*big.Int, b []*big.Int) (ECPoint) {
+*/
+func TwoVectorPCommit(a []*big.Int, b []*big.Int) ECPoint {
 	if len(a) != len(b) {
 		fmt.Println("TwoVectorPCommit: Uh oh! Arrays not of the same length")
 		fmt.Printf("len(a): %d\n", len(a))
@@ -120,13 +119,12 @@ func TwoVectorPCommit(a []*big.Int, b []*big.Int) (ECPoint) {
 
 	commitment := EC.Zero()
 
-	for i := 0; i < EC.V; i++{
+	for i := 0; i < EC.V; i++ {
 		commitment = commitment.Add(EC.BPG[i].Mult(a[i])).Add(EC.BPH[i].Mult(b[i]))
 	}
 
 	return commitment
 }
-
 
 /*
 Vector Pedersen Commitment with Gens
@@ -135,8 +133,8 @@ Given an array of values, we commit the array with different generators
 for each element and for each randomness.
 
 We also pass in the Generators we want to use
- */
-func TwoVectorPCommitWithGens(G,H []ECPoint, a, b []*big.Int) (ECPoint) {
+*/
+func TwoVectorPCommitWithGens(G, H []ECPoint, a, b []*big.Int) ECPoint {
 	if len(G) != len(H) || len(G) != len(a) || len(a) != len(b) {
 		fmt.Println("TwoVectorPCommitWithGens: Uh oh! Arrays not of the same length")
 		fmt.Printf("len(G): %d\n", len(G))
@@ -147,7 +145,7 @@ func TwoVectorPCommitWithGens(G,H []ECPoint, a, b []*big.Int) (ECPoint) {
 
 	commitment := EC.Zero()
 
-	for i := 0; i < len(G); i++{
+	for i := 0; i < len(G); i++ {
 		modA := new(big.Int).Mod(a[i], EC.N)
 		modB := new(big.Int).Mod(b[i], EC.N)
 
@@ -156,7 +154,6 @@ func TwoVectorPCommitWithGens(G,H []ECPoint, a, b []*big.Int) (ECPoint) {
 
 	return commitment
 }
-
 
 // The length here always has to be a power of two
 func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
@@ -168,7 +165,7 @@ func InnerProduct(a []*big.Int, b []*big.Int) *big.Int {
 
 	c := big.NewInt(0)
 
-	for i := range a{
+	for i := range a {
 		tmp1 := new(big.Int).Mul(a[i], b[i])
 		c = new(big.Int).Add(c, new(big.Int).Mod(tmp1, EC.N))
 	}
@@ -184,7 +181,7 @@ func VectorAdd(v []*big.Int, w []*big.Int) []*big.Int {
 	}
 	result := make([]*big.Int, len(v))
 
-	for i := range v{
+	for i := range v {
 		result[i] = new(big.Int).Mod(new(big.Int).Add(v[i], w[i]), EC.N)
 	}
 
@@ -217,35 +214,33 @@ func VectorAddScalar(v []*big.Int, s *big.Int) []*big.Int {
 	return result
 }
 
-
 func ScalarVectorMul(v []*big.Int, s *big.Int) []*big.Int {
 	result := make([]*big.Int, len(v))
 
-	for i := range v{
+	for i := range v {
 		result[i] = new(big.Int).Mod(new(big.Int).Mul(v[i], s), EC.N)
 	}
 
 	return result
 }
 
-
 /*
 InnerProd Proof
 
 This stores the argument values
 
- */
+*/
 type InnerProdArg struct {
-	L 	[]ECPoint
-	R 	[]ECPoint
-	A	*big.Int
-	B 	*big.Int
+	L []ECPoint
+	R []ECPoint
+	A *big.Int
+	B *big.Int
 
-	Challenges 	[]*big.Int
+	Challenges []*big.Int
 }
 
-func GenerateNewParams(G, H []ECPoint, x *big.Int, L, R, P ECPoint) ([]ECPoint, []ECPoint, ECPoint){
-	nprime := len(G)/2
+func GenerateNewParams(G, H []ECPoint, x *big.Int, L, R, P ECPoint) ([]ECPoint, []ECPoint, ECPoint) {
+	nprime := len(G) / 2
 
 	Gprime := make([]ECPoint, nprime)
 	Hprime := make([]ECPoint, nprime)
@@ -278,7 +273,7 @@ This is a building block for BulletProofs
 */
 func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []*big.Int, u ECPoint, P ECPoint) InnerProdArg {
 	//fmt.Printf("Proof so far: %s\n", proof)
-	if len(a) == 1{
+	if len(a) == 1 {
 		// Prover sends a & b
 		//fmt.Printf("a: %d && b: %d\n", a[0], b[0])
 		proof.A = a[0]
@@ -286,9 +281,9 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 		return proof
 	}
 
-	curIt := int(math.Log2(float64(len(a))))-1
+	curIt := int(math.Log2(float64(len(a)))) - 1
 
-	nprime := len(a)/2
+	nprime := len(a) / 2
 	//fmt.Println(nprime)
 	//fmt.Println(len(H))
 	cl := InnerProduct(a[:nprime], b[nprime:]) // either this line
@@ -301,8 +296,8 @@ func InnerProductProveSub(proof InnerProdArg, G, H []ECPoint, a []*big.Int, b []
 
 	// prover sends L & R and gets a challenge
 	s256 := sha256.Sum256([]byte(
-				L.X.String() + L.Y.String() +
-				R.X.String() + R.Y.String()))
+		L.X.String() + L.Y.String() +
+			R.X.String() + R.Y.String()))
 
 	x := new(big.Int).SetBytes(s256[:])
 
@@ -357,46 +352,46 @@ all g' and h' computations
 P : the Pedersen commitment we are verifying is a commitment to the innner product
 ipp : the proof
 
- */
-func InnerProductVerify(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdArg) bool{
-	 //fmt.Println("Verifying Inner Product Argument")
-	 //fmt.Printf("Commitment Value: %s \n", P)
-	 s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
-	 chal1 := new(big.Int).SetBytes(s1[:])
-	 ux := U.Mult(chal1)
-	 curIt := len(ipp.Challenges)-1
+*/
+func InnerProductVerify(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdArg) bool {
+	//fmt.Println("Verifying Inner Product Argument")
+	//fmt.Printf("Commitment Value: %s \n", P)
+	s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
+	chal1 := new(big.Int).SetBytes(s1[:])
+	ux := U.Mult(chal1)
+	curIt := len(ipp.Challenges) - 1
 
-	 if ipp.Challenges[curIt].Cmp(chal1) != 0 {
-	 	fmt.Println("IPVerify - Initial Challenge Failed")
-	 	return false
-	 }
+	if ipp.Challenges[curIt].Cmp(chal1) != 0 {
+		fmt.Println("IPVerify - Initial Challenge Failed")
+		return false
+	}
 
-	 curIt -= 1
+	curIt -= 1
 
-	 Gprime := G
-	 Hprime := H
-	 Pprime := P.Add(ux.Mult(c)) // line 6 from protocol 1
-	 //fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
+	Gprime := G
+	Hprime := H
+	Pprime := P.Add(ux.Mult(c)) // line 6 from protocol 1
+	//fmt.Printf("New Commitment value with u^cx: %s \n", Pprime)
 
-	 for curIt >= 0 {
-	 	Lval := ipp.L[curIt]
-	 	Rval := ipp.R[curIt]
+	for curIt >= 0 {
+		Lval := ipp.L[curIt]
+		Rval := ipp.R[curIt]
 
-		 // prover sends L & R and gets a challenge
-		 s256 := sha256.Sum256([]byte(
-			 Lval.X.String() + Lval.Y.String() +
-			 Rval.X.String() + Rval.Y.String()))
+		// prover sends L & R and gets a challenge
+		s256 := sha256.Sum256([]byte(
+			Lval.X.String() + Lval.Y.String() +
+				Rval.X.String() + Rval.Y.String()))
 
-		 chal2 := new(big.Int).SetBytes(s256[:])
+		chal2 := new(big.Int).SetBytes(s256[:])
 
-		 if ipp.Challenges[curIt].Cmp(chal2) != 0 {
-		 	fmt.Println("IPVerify - Challenge verification failed at index " + strconv.Itoa(curIt))
-		 	return false
-		 }
+		if ipp.Challenges[curIt].Cmp(chal2) != 0 {
+			fmt.Println("IPVerify - Challenge verification failed at index " + strconv.Itoa(curIt))
+			return false
+		}
 
-		 Gprime, Hprime, Pprime = GenerateNewParams(Gprime, Hprime, chal2, Lval, Rval, Pprime)
-	 	curIt -= 1
-	 }
+		Gprime, Hprime, Pprime = GenerateNewParams(Gprime, Hprime, chal2, Lval, Rval, Pprime)
+		curIt -= 1
+	}
 	ccalc := new(big.Int).Mod(new(big.Int).Mul(ipp.A, ipp.B), EC.N)
 
 	Pcalc1 := Gprime[0].Mult(ipp.A)
@@ -414,19 +409,18 @@ func InnerProductVerify(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdA
 	return true
 }
 
-
 /* Inner Product Verify Fast
 Given a inner product proof, verifies the correctness of the proof. Does the same as above except
 we replace n separate exponentiations with a single multi-exponentiation.
- */
+*/
 
-func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdArg) bool{
+func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerProdArg) bool {
 	//fmt.Println("Verifying Inner Product Argument")
 	//fmt.Printf("Commitment Value: %s \n", P)
 	s1 := sha256.Sum256([]byte(P.X.String() + P.Y.String()))
 	chal1 := new(big.Int).SetBytes(s1[:])
 	ux := U.Mult(chal1)
-	curIt := len(ipp.Challenges)-1
+	curIt := len(ipp.Challenges) - 1
 
 	// check all challenges
 	if ipp.Challenges[curIt].Cmp(chal1) != 0 {
@@ -434,7 +428,7 @@ func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerP
 		return false
 	}
 
-	for j:= curIt - 1; j >= 0; j-- {
+	for j := curIt - 1; j >= 0; j-- {
 		Lval := ipp.L[j]
 		Rval := ipp.R[j]
 
@@ -456,7 +450,7 @@ func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerP
 	Pprime := P.Add(ux.Mult(c)) // line 6 from protocol 1
 
 	tmp1 := EC.Zero()
-	for j := curIt; j >= 0; j--{
+	for j := curIt; j >= 0; j-- {
 		x2 := new(big.Int).Exp(ipp.Challenges[j], big.NewInt(2), EC.N)
 		x2i := new(big.Int).ModInverse(x2, EC.N)
 		//fmt.Println(tmp1)
@@ -468,12 +462,12 @@ func InnerProductVerifyFast(c *big.Int, P, U ECPoint, G, H []ECPoint, ipp InnerP
 	sScalars := make([]*big.Int, EC.V)
 	invsScalars := make([]*big.Int, EC.V)
 
-	for i := 0; i < EC.V; i++{
+	for i := 0; i < EC.V; i++ {
 		si := big.NewInt(1)
-		for j := curIt; j >= 0; j--{
+		for j := curIt; j >= 0; j-- {
 			// original challenge if the jth bit of i is 1, inverse challenge otherwise
 			chal := ipp.Challenges[j]
-			if  big.NewInt(int64(i)).Bit(j) == 0 {
+			if big.NewInt(int64(i)).Bit(j) == 0 {
 				chal = new(big.Int).ModInverse(chal, EC.N)
 			}
 			// fmt.Printf("Challenge raised to value: %d\n", chal)
@@ -510,7 +504,7 @@ func PadLeft(str, pad string, l int) string {
 func STRNot(str string) string {
 	result := ""
 
-	for _,i := range str{
+	for _, i := range str {
 		if i == '0' {
 			result += "1"
 		} else {
@@ -536,18 +530,17 @@ func StrToBigIntArray(str string) []*big.Int {
 func reverse(l []*big.Int) []*big.Int {
 	result := make([]*big.Int, len(l))
 
-	for i := range(l){
+	for i := range l {
 		result[i] = l[len(l)-i-1]
 	}
 
 	return result
 }
 
-
 func PowerVector(l int, base *big.Int) []*big.Int {
 	result := make([]*big.Int, l)
 
-	for i := 0; i < l; i++{
+	for i := 0; i < l; i++ {
 		result[i] = new(big.Int).Exp(base, big.NewInt(int64(i)), EC.N)
 	}
 
@@ -566,10 +559,10 @@ func RandVector(l int) []*big.Int {
 	return result
 }
 
-func VectorSum(y []*big.Int) *big.Int{
+func VectorSum(y []*big.Int) *big.Int {
 	result := big.NewInt(0)
 
-	for _,j := range y {
+	for _, j := range y {
 		result = new(big.Int).Mod(new(big.Int).Add(result, j), EC.N)
 	}
 
@@ -577,27 +570,27 @@ func VectorSum(y []*big.Int) *big.Int{
 }
 
 type RangeProof struct {
-	Comm 	ECPoint
-	A		ECPoint
-	S 		ECPoint
-	T1 		ECPoint
-	T2		ECPoint
-	Tau 	*big.Int
-	Th 		*big.Int
-	Mu 		*big.Int
-	IPP 	InnerProdArg
+	Comm ECPoint
+	A    ECPoint
+	S    ECPoint
+	T1   ECPoint
+	T2   ECPoint
+	Tau  *big.Int
+	Th   *big.Int
+	Mu   *big.Int
+	IPP  InnerProdArg
 
 	// challenges
-	Cy 		*big.Int
-	Cz 		*big.Int
-	Cx 		*big.Int
+	Cy *big.Int
+	Cz *big.Int
+	Cx *big.Int
 }
 
 /*
 Delta is a helper function that is used in the range proof
 
 \delta(y, z) = (z-z^2)<1^n, y^n> - z^3<1^n, 2^n>
- */
+*/
 
 func Delta(y []*big.Int, z *big.Int) *big.Int {
 	result := big.NewInt(0)
@@ -643,7 +636,7 @@ func CalculateR(aR, sR, y, po2 []*big.Int, z, x *big.Int) []*big.Int {
 	z2 := new(big.Int).Exp(z, big.NewInt(2), EC.N)
 	tmp11 := VectorAddScalar(aR, z)
 	tmp12 := ScalarVectorMul(sR, x)
-	tmp1 := VectorHadamard(y, VectorAdd(tmp11,tmp12))
+	tmp1 := VectorHadamard(y, VectorAdd(tmp11, tmp12))
 	tmp2 := ScalarVectorMul(po2, z2)
 
 	result = VectorAdd(tmp1, tmp2)
@@ -651,18 +644,16 @@ func CalculateR(aR, sR, y, po2 []*big.Int, z, x *big.Int) []*big.Int {
 	return result
 }
 
-
 /*
 RPProver : Range Proof Prove
 
 Given a value v, provides a range proof that v is inside 0 to 2^64-1
- */
+*/
 func RPProve(v *big.Int) RangeProof {
 
 	rpresult := RangeProof{}
 
 	PowerOfTwos := PowerVector(EC.V, big.NewInt(2))
-
 
 	if v.Cmp(big.NewInt(0)) == -1 {
 		panic("Value is below range! Not proving")
@@ -710,22 +701,22 @@ func RPProve(v *big.Int) RangeProof {
 	// need to generate l(X), r(X), and t(X)=<l(X),r(X)>
 
 	/*
-	Java code on how to calculate t1 and t2
+		Java code on how to calculate t1 and t2
 
-		FieldVector ys = FieldVector.from(VectorX.iterate(n, BigInteger.ONE, y::multiply),q); //powers of y
-	    FieldVector l0 = aL.add(z.negate());
-        FieldVector l1 = sL;
-        FieldVector twoTimesZSquared = twos.times(zSquared);
-        FieldVector r0 = ys.hadamard(aR.add(z)).add(twoTimesZSquared);
-        FieldVector r1 = sR.hadamard(ys);
-        BigInteger k = ys.sum().multiply(z.subtract(zSquared)).subtract(zCubed.shiftLeft(n).subtract(zCubed));
-        BigInteger t0 = k.add(zSquared.multiply(number));
-        BigInteger t1 = l1.innerPoduct(r0).add(l0.innerPoduct(r1));
-        BigInteger t2 = l1.innerPoduct(r1);
-   		PolyCommitment<T> polyCommitment = PolyCommitment.from(base, t0, VectorX.of(t1, t2));
+			FieldVector ys = FieldVector.from(VectorX.iterate(n, BigInteger.ONE, y::multiply),q); //powers of y
+		    FieldVector l0 = aL.add(z.negate());
+	        FieldVector l1 = sL;
+	        FieldVector twoTimesZSquared = twos.times(zSquared);
+	        FieldVector r0 = ys.hadamard(aR.add(z)).add(twoTimesZSquared);
+	        FieldVector r1 = sR.hadamard(ys);
+	        BigInteger k = ys.sum().multiply(z.subtract(zSquared)).subtract(zCubed.shiftLeft(n).subtract(zCubed));
+	        BigInteger t0 = k.add(zSquared.multiply(number));
+	        BigInteger t1 = l1.innerPoduct(r0).add(l0.innerPoduct(r1));
+	        BigInteger t2 = l1.innerPoduct(r1);
+	   		PolyCommitment<T> polyCommitment = PolyCommitment.from(base, t0, VectorX.of(t1, t2));
 
 
-	 */
+	*/
 	PowerOfCY := PowerVector(EC.V, cy)
 	// fmt.Println(PowerOfCY)
 	l0 := VectorAddScalar(aL, new(big.Int).Neg(cz))
@@ -740,7 +731,7 @@ func RPProve(v *big.Int) RangeProof {
 	r1 := VectorHadamard(sR, PowerOfCY)
 
 	//calculate t0
-	t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mul(v, z2), Delta(PowerOfCY, cz)),EC.N)
+	t0 := new(big.Int).Mod(new(big.Int).Add(new(big.Int).Mul(v, z2), Delta(PowerOfCY, cz)), EC.N)
 
 	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(sL, r0), InnerProduct(l0, r1)), EC.N)
 	t2 := InnerProduct(sL, r1)
@@ -771,9 +762,9 @@ func RPProve(v *big.Int) RangeProof {
 			new(big.Int).Add(
 				new(big.Int).Mul(
 					t1, cx),
-					new(big.Int).Mul(
-						new(big.Int).Mul(cx,cx),
-						t2))), EC.N)
+				new(big.Int).Mul(
+					new(big.Int).Mul(cx, cx),
+					t2))), EC.N)
 
 	that := InnerProduct(left, right) // NOTE: BP Java implementation calculates this from the t_i
 
@@ -795,7 +786,6 @@ func RPProve(v *big.Int) RangeProof {
 
 	mu := new(big.Int).Mod(new(big.Int).Add(alpha, new(big.Int).Mul(rho, cx)), EC.N)
 	rpresult.Mu = mu
-
 
 	HPrime := make([]ECPoint, len(EC.BPH))
 
@@ -861,7 +851,7 @@ func RPVerify(rp RangeProof) bool {
 		rp.T1.Mult(cx)).Add(
 		rp.T2.Mult(new(big.Int).Mul(cx, cx)))
 
-	if !lhs.Equal(rhs){
+	if !lhs.Equal(rhs) {
 		fmt.Println("RPVerify - Uh oh! Check line (63) of verification")
 		fmt.Println(rhs)
 		fmt.Println(lhs)
@@ -889,7 +879,6 @@ func RPVerify(rp RangeProof) bool {
 		val2 := new(big.Int).Mul(new(big.Int).Mul(cz, cz), PowerOfTwos[i])
 		tmp2 = tmp2.Add(HPrime[i].Mult(new(big.Int).Add(val1, val2)))
 	}
-
 
 	// without subtracting this value should equal muCH + l[i]G[i] + r[i]H'[i]
 	// we want to make sure that the innerproduct checks out, so we subtract it
@@ -929,7 +918,7 @@ func CalculateRMRP(aR, sR, y, zTimesTwo []*big.Int, z, x *big.Int) []*big.Int {
 
 	tmp11 := VectorAddScalar(aR, z)
 	tmp12 := ScalarVectorMul(sR, x)
-	tmp1 := VectorHadamard(y, VectorAdd(tmp11,tmp12))
+	tmp1 := VectorHadamard(y, VectorAdd(tmp11, tmp12))
 
 	result = VectorAdd(tmp1, zTimesTwo)
 
@@ -940,7 +929,7 @@ func CalculateRMRP(aR, sR, y, zTimesTwo []*big.Int, z, x *big.Int) []*big.Int {
 DeltaMRP is a helper function that is used in the multi range proof
 
 \delta(y, z) = (z-z^2)<1^n, y^n> - \sum_j z^3+j<1^n, 2^n>
- */
+*/
 
 func DeltaMRP(y []*big.Int, z *big.Int, m int) *big.Int {
 	result := big.NewInt(0)
@@ -955,7 +944,7 @@ func DeltaMRP(y []*big.Int, z *big.Int, m int) *big.Int {
 	po2sum := new(big.Int).Sub(new(big.Int).Exp(big.NewInt(2), big.NewInt(int64(EC.V/m)), EC.N), big.NewInt(1))
 	t3 := big.NewInt(0)
 
-	for j := 0; j < m; j++{
+	for j := 0; j < m; j++ {
 		zp := new(big.Int).Exp(z, big.NewInt(3+int64(j)), EC.N)
 		tmp1 := new(big.Int).Mod(new(big.Int).Mul(zp, po2sum), EC.N)
 		t3 = new(big.Int).Mod(new(big.Int).Add(t3, tmp1), EC.N)
@@ -967,20 +956,20 @@ func DeltaMRP(y []*big.Int, z *big.Int, m int) *big.Int {
 }
 
 type MultiRangeProof struct {
-	Comms 	[]ECPoint
-	A		ECPoint
-	S 		ECPoint
-	T1 		ECPoint
-	T2		ECPoint
-	Tau 	*big.Int
-	Th 		*big.Int
-	Mu 		*big.Int
-	IPP 	InnerProdArg
+	Comms []ECPoint
+	A     ECPoint
+	S     ECPoint
+	T1    ECPoint
+	T2    ECPoint
+	Tau   *big.Int
+	Th    *big.Int
+	Mu    *big.Int
+	IPP   InnerProdArg
 
 	// challenges
-	Cy 		*big.Int
-	Cz 		*big.Int
-	Cx 		*big.Int
+	Cy *big.Int
+	Cz *big.Int
+	Cx *big.Int
 }
 
 /*
@@ -996,14 +985,14 @@ changes:
 
 {(g, h \in G, \textbf{V} \in G^m ; \textbf{v, \gamma} \in Z_p^m) :
 	V_j = h^{\gamma_j}g^{v_j} \wedge v_j \in [0, 2^n - 1] \forall j \in [1, m]}
- */
+*/
 func MRPProve(values []*big.Int) MultiRangeProof {
 	// EC.V has the total number of values and bits we can support
 
 	MRPResult := MultiRangeProof{}
 
 	m := len(values)
-	bitsPerValue := EC.V/m
+	bitsPerValue := EC.V / m
 
 	// we concatenate the binary representation of the values
 
@@ -1067,7 +1056,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	zPowersTimesTwoVec := make([]*big.Int, EC.V)
 	for j := 0; j < m; j++ {
 		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), EC.N)
-		for i := 0; i < bitsPerValue; i ++{
+		for i := 0; i < bitsPerValue; i++ {
 			zPowersTimesTwoVec[j*bitsPerValue+i] = new(big.Int).Mod(new(big.Int).Mul(PowerOfTwos[i], zp), EC.N)
 		}
 	}
@@ -1077,25 +1066,25 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	// need to generate l(X), r(X), and t(X)=<l(X),r(X)>
 
 	/*
-	Java code on how to calculate t1 and t2
+		Java code on how to calculate t1 and t2
 
-        //z^Q
-        FieldVector zs = FieldVector.from(VectorX.iterate(m, z.pow(2), z::multiply).map(bi -> bi.mod(q)), q);
-        //2^n
-        VectorX<BigInteger> twoVector = VectorX.iterate(bitsPerNumber, BigInteger.ONE, bi -> bi.shiftLeft(1));
-        FieldVector twos = FieldVector.from(twoVector, q);
-        //2^n \cdot z || 2^n \cdot z^2 ...
-        FieldVector twoTimesZs = FieldVector.from(zs.getVector().flatMap(twos::times), q);
-        //l(X)
-        FieldVector l0 = aL.add(z.negate());
-        FieldVector l1 = sL;
-        FieldVectorPolynomial lPoly = new FieldVectorPolynomial(l0, l1);
-        //r(X)
-        FieldVector r0 = ys.hadamard(aR.add(z)).add(twoTimesZs);
-        FieldVector r1 = sR.hadamard(ys);
-		FieldVectorPolynomial rPoly = new FieldVectorPolynomial(r0, r1);
+	        //z^Q
+	        FieldVector zs = FieldVector.from(VectorX.iterate(m, z.pow(2), z::multiply).map(bi -> bi.mod(q)), q);
+	        //2^n
+	        VectorX<BigInteger> twoVector = VectorX.iterate(bitsPerNumber, BigInteger.ONE, bi -> bi.shiftLeft(1));
+	        FieldVector twos = FieldVector.from(twoVector, q);
+	        //2^n \cdot z || 2^n \cdot z^2 ...
+	        FieldVector twoTimesZs = FieldVector.from(zs.getVector().flatMap(twos::times), q);
+	        //l(X)
+	        FieldVector l0 = aL.add(z.negate());
+	        FieldVector l1 = sL;
+	        FieldVectorPolynomial lPoly = new FieldVectorPolynomial(l0, l1);
+	        //r(X)
+	        FieldVector r0 = ys.hadamard(aR.add(z)).add(twoTimesZs);
+	        FieldVector r1 = sR.hadamard(ys);
+			FieldVectorPolynomial rPoly = new FieldVectorPolynomial(r0, r1);
 
-	 */
+	*/
 	PowerOfCY := PowerVector(EC.V, cy)
 	// fmt.Println(PowerOfCY)
 	l0 := VectorAddScalar(aLConcat, new(big.Int).Neg(cz))
@@ -1111,7 +1100,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	vz2 := big.NewInt(0)
 	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), EC.N)
 	PowerOfCZ := PowerVector(m, cz)
-	for j := 0; j < m; j++{
+	for j := 0; j < m; j++ {
 		vz2 = new(big.Int).Add(vz2,
 			new(big.Int).Mul(
 				PowerOfCZ[j],
@@ -1119,7 +1108,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 		vz2 = new(big.Int).Mod(vz2, EC.N)
 	}
 
-	t0 := new(big.Int).Mod(new(big.Int).Add(vz2, DeltaMRP(PowerOfCY, cz, m)),EC.N)
+	t0 := new(big.Int).Mod(new(big.Int).Add(vz2, DeltaMRP(PowerOfCY, cz, m)), EC.N)
 
 	t1 := new(big.Int).Mod(new(big.Int).Add(InnerProduct(l1, r0), InnerProduct(l0, r1)), EC.N)
 	t2 := InnerProduct(l1, r1)
@@ -1145,7 +1134,7 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	right := CalculateRMRP(aRConcat, sR, PowerOfCY, zPowersTimesTwoVec, cz, cx)
 
 	thatPrime := new(big.Int).Mod( // t0 + t1*x + t2*x^2
-		new(big.Int).Add(t0, new(big.Int).Add(new(big.Int).Mul(t1, cx), new(big.Int).Mul(new(big.Int).Mul(cx,cx), t2))), EC.N)
+		new(big.Int).Add(t0, new(big.Int).Add(new(big.Int).Mul(t1, cx), new(big.Int).Mul(new(big.Int).Mul(cx, cx), t2))), EC.N)
 
 	that := InnerProduct(left, right) // NOTE: BP Java implementation calculates this from the t_i
 
@@ -1159,10 +1148,10 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 	MRPResult.Th = that
 
 	vecRandomnessTotal := big.NewInt(0)
-	for j := 0; j < m; j++{
+	for j := 0; j < m; j++ {
 		zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), EC.N)
 		tmp1 := new(big.Int).Mul(gammas[j], zp)
-		vecRandomnessTotal = new(big.Int).Mod(new(big.Int).Add(vecRandomnessTotal, tmp1) , EC.N)
+		vecRandomnessTotal = new(big.Int).Mod(new(big.Int).Add(vecRandomnessTotal, tmp1), EC.N)
 	}
 	//fmt.Println(vecRandomnessTotal)
 	taux1 := new(big.Int).Mod(new(big.Int).Mul(tau2, new(big.Int).Mul(cx, cx)), EC.N)
@@ -1192,10 +1181,10 @@ func MRPProve(values []*big.Int) MultiRangeProof {
 MultiRangeProof Verify
 Takes in a MultiRangeProof and verifies its correctness
 
- */
+*/
 func MRPVerify(mrp MultiRangeProof) bool {
 	m := len(mrp.Comms)
-	bitsPerValue := EC.V/m
+	bitsPerValue := EC.V / m
 
 	//changes:
 	// check 1 changes since it includes all commitments
@@ -1232,7 +1221,7 @@ func MRPVerify(mrp MultiRangeProof) bool {
 	PowersOfZ := PowerVector(m, cz)
 	z2 := new(big.Int).Mod(new(big.Int).Mul(cz, cz), EC.N)
 
-	for j := 0; j < m; j++{
+	for j := 0; j < m; j++ {
 		CommPowers = CommPowers.Add(mrp.Comms[j].Mult(new(big.Int).Mul(z2, PowersOfZ[j])))
 	}
 
@@ -1240,7 +1229,7 @@ func MRPVerify(mrp MultiRangeProof) bool {
 		mrp.T1.Mult(cx)).Add(
 		mrp.T2.Mult(new(big.Int).Mul(cx, cx))).Add(CommPowers)
 
-	if !lhs.Equal(rhs){
+	if !lhs.Equal(rhs) {
 		fmt.Println("MRPVerify - Uh oh! Check line (63) of verification")
 		fmt.Println(rhs)
 		fmt.Println(lhs)
@@ -1265,10 +1254,10 @@ func MRPVerify(mrp MultiRangeProof) bool {
 
 	for j := 0; j < m; j++ {
 		for i := 0; i < bitsPerValue; i++ {
-			val1 := new(big.Int).Mul(cz, PowersOfY[j*bitsPerValue + i])
+			val1 := new(big.Int).Mul(cz, PowersOfY[j*bitsPerValue+i])
 			zp := new(big.Int).Exp(cz, big.NewInt(2+int64(j)), EC.N)
 			val2 := new(big.Int).Mod(new(big.Int).Mul(zp, PowerOfTwos[i]), EC.N)
-			tmp2 = tmp2.Add(HPrime[j*bitsPerValue + i].Mult(new(big.Int).Add(val1, val2)))
+			tmp2 = tmp2.Add(HPrime[j*bitsPerValue+i].Mult(new(big.Int).Add(val1, val2)))
 		}
 	}
 
@@ -1296,7 +1285,6 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 	cg := ECPoint{}
 	ch := ECPoint{}
 
-
 	j := 0
 	confirmed := 0
 	for confirmed < (2*n + 3) {
@@ -1309,14 +1297,14 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 		}
 
 		gen2, err := btcec.ParsePubKey(potentialXValue, btcec.S256())
-		if err == nil{
-			if confirmed == 2*n{ // once we've generated all g and h values then assign this to u
+		if err == nil {
+			if confirmed == 2*n { // once we've generated all g and h values then assign this to u
 				u = ECPoint{gen2.X, gen2.Y}
 				//fmt.Println("Got that U value")
-			} else if confirmed == 2*n +1 {
+			} else if confirmed == 2*n+1 {
 				cg = ECPoint{gen2.X, gen2.Y}
 
-			} else if confirmed == 2*n + 2 {
+			} else if confirmed == 2*n+2 {
 				ch = ECPoint{gen2.X, gen2.Y}
 			} else {
 				if confirmed%2 == 0 {
@@ -1343,8 +1331,6 @@ func NewECPrimeGroupKey(n int) CryptoParams {
 		cg,
 		ch}
 }
-
-
 
 func init() {
 	EC = NewECPrimeGroupKey(VecLength)
